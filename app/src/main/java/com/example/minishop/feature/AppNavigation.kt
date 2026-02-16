@@ -1,0 +1,113 @@
+package com.example.minishop.feature
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.minishop.R
+
+sealed class RootRoute(
+    val route: String
+) {
+    data object Main : RootRoute("main")
+    data object LogIn : RootRoute("log_in")
+    data object Details : RootRoute("details/{productId}") {
+        fun create(productId: Int) = "details/$productId"
+    }
+}
+
+enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
+    HOME("home", "Home", R.drawable.ic_home),
+    FAVORITES("favorites", "Favorites", R.drawable.ic_heart),
+    CART("cart", "Cart", R.drawable.ic_shopping_cart),
+    PROFILE("profile", "Profile", R.drawable.ic_profile_image)
+}
+
+@Composable
+fun ShopRootNavHost(
+    modifier: Modifier = Modifier.statusBarsPadding()
+) {
+    val rootNavController = rememberNavController()
+    NavHost(
+        navController = rootNavController, startDestination = RootRoute.Main.route,
+        modifier = modifier
+    ) {
+        composable(route = RootRoute.LogIn.route) {}
+        composable (route = RootRoute.Main.route) {
+            MainScreen()
+        }
+        composable (route = RootRoute.Details.route) {}
+    }
+}
+
+@Composable
+fun TabsNavHost(
+    navController: NavHostController,
+    startDestination: TabRoutes,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination.route,
+        modifier = modifier.fillMaxSize()
+    ) {
+        composable(TabRoutes.HOME.route) {}
+        composable(TabRoutes.FAVORITES.route) {}
+        composable(TabRoutes.CART.route) {}
+        composable(TabRoutes.PROFILE.route) {}
+    }
+}
+
+@Composable
+fun MainScreen(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+    val startDestination = TabRoutes.HOME
+    var selectedDestination by rememberSaveable() { mutableStateOf(startDestination.ordinal) }
+
+    Scaffold(
+        modifier = modifier, bottomBar = {
+            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                TabRoutes.entries.forEachIndexed { index, destination ->
+                    NavigationBarItem(
+                        selected = selectedDestination == index,
+                        onClick = {
+                            navController.navigate(route = destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            selectedDestination = index
+                                  },
+                        icon = {
+                            Icon(
+                                painter = painterResource(destination.iconRes),
+                                contentDescription = null
+                            )
+                        })
+                }
+            }
+        }
+    ) { contentPadding ->
+        TabsNavHost(navController, startDestination, modifier.padding(contentPadding))
+    }
+}
