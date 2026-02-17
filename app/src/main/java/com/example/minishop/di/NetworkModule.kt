@@ -13,6 +13,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
+    private val BASE_URL = "https://fakestoreapi.com/"
 
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -31,7 +32,7 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder().baseUrl("").addConverterFactory(GsonConverterFactory.create())
+        return Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient).build()
     }
 }
