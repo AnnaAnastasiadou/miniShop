@@ -6,4 +6,5 @@ import com.example.minishop.data.remote.products.ProductsApi
 
 interface ProductsRepository {
     suspend fun getAllProducts(): NetworkResult<List<ProductDto>>
+    suspend fun getProductById(productId: Int): ProductDto?
 }
