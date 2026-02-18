@@ -5,4 +5,6 @@ import com.example.minishop.data.remote.authorization.LoginResponseDto
 
 interface AuthRepository {
     suspend fun logIn(username: String, password: String): NetworkResult<LoginResponseDto>
+    suspend fun logOut()
+    suspend fun isLoggedIn(): Boolean
 }

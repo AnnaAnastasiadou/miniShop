@@ -1,5 +1,7 @@
 package com.example.minishop.di
 
+import com.example.minishop.core.AuthSessionManager
+import com.example.minishop.data.remote.AuthInterceptor
 import com.example.minishop.data.remote.authorization.AuthApi
 import com.example.minishop.data.remote.cart.CartApi
 import com.example.minishop.data.remote.category.CategoryApi
@@ -28,10 +30,17 @@ class NetworkModule {
     }
 
     @Provides
+    fun provideAuthInterceptor(session: AuthSessionManager): AuthInterceptor = AuthInterceptor(session)
+
+    @Provides
     fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor
     ): OkHttpClient {
-        return OkHttpClient.Builder().addNetworkInterceptor(loggingInterceptor).build()
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .build()
     }
 
     @Provides
