@@ -8,5 +8,6 @@ import javax.inject.Inject
 interface AuthRepository {
     suspend fun logIn(username: String, password: String): NetworkResult<LoginResponseDto>
     suspend fun logOut()
+    suspend fun isLoggedIn(): Boolean
 
 }

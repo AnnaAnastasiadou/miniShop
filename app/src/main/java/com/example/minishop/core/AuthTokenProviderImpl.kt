@@ -13,4 +13,8 @@ class AuthTokenProviderImpl @Inject constructor() : AuthTokenProvider {
         cachedToken = token
     }
 
+    override fun clearToken() {
+        cachedToken = null
+    }
+
 }
