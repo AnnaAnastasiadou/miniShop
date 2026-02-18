@@ -8,7 +8,7 @@ class AuthInterceptor(
     private val sessionManager: AuthSessionManager
 ): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = sessionManager.loadToken()
+        val token = sessionManager.token()
 
         val request = if (token.isNullOrBlank()) {
             chain.request()
