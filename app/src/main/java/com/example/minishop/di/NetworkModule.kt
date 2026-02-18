@@ -1,6 +1,6 @@
 package com.example.minishop.di
 
-import com.example.minishop.core.AuthSessionManager
+import com.example.minishop.core.AuthTokenProvider
 import com.example.minishop.data.remote.AuthInterceptor
 import com.example.minishop.data.remote.authorization.AuthApi
 import com.example.minishop.data.remote.cart.CartApi
@@ -14,7 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -30,7 +29,7 @@ class NetworkModule {
     }
 
     @Provides
-    fun provideAuthInterceptor(session: AuthSessionManager): AuthInterceptor = AuthInterceptor(session)
+    fun provideAuthInterceptor(session: AuthTokenProvider): AuthInterceptor = AuthInterceptor(session)
 
     @Provides
     fun provideOkHttpClient(

@@ -1,14 +1,14 @@
 package com.example.minishop.data.remote
 
-import com.example.minishop.core.AuthSessionManager
+import com.example.minishop.core.AuthTokenProvider
 import okhttp3.Interceptor
 import okhttp3.Response
 
 class AuthInterceptor(
-    private val sessionManager: AuthSessionManager
+    private val sessionManager: AuthTokenProvider
 ): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = sessionManager.token()
+        val token = sessionManager.getToken()
 
         val request = if (token.isNullOrBlank()) {
             chain.request()

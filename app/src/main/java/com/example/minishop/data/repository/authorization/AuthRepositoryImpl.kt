@@ -1,5 +1,6 @@
 package com.example.minishop.data.repository.authorization
 
+import com.example.minishop.core.AuthTokenProvider
 import com.example.minishop.data.local.datasource.SharedPreferencesDatasourceImpl
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.authorization.AuthApi
@@ -9,7 +10,9 @@ import com.example.minishop.data.repository.safeCall
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val authApi: AuthApi, private val datasource: SharedPreferencesDatasourceImpl
+    private val authApi: AuthApi,
+    private val datasource: SharedPreferencesDatasourceImpl,
+    private val tokenProvider: AuthTokenProvider
 ) : AuthRepository {
     override suspend fun logIn(
         username: String, password: String
@@ -23,6 +26,7 @@ class AuthRepositoryImpl @Inject constructor(
 
         if (result is NetworkResult.Success) {
             datasource.saveToken(result.data.token)
+            tokenProvider.setToken(result.data.token)
         }
 
         return result
