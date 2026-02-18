@@ -29,7 +29,8 @@ class NetworkModule {
     }
 
     @Provides
-    fun provideAuthInterceptor(session: AuthTokenProvider): AuthInterceptor = AuthInterceptor(session)
+    fun provideAuthInterceptor(tokenProvider: AuthTokenProvider): AuthInterceptor =
+        AuthInterceptor(tokenProvider)
 
     @Provides
     fun provideOkHttpClient(

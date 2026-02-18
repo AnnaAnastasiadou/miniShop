@@ -4,9 +4,7 @@ import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.repository.authorization.AuthRepositoryImpl
 import javax.inject.Inject
 
-class AuthTokenProviderImpl @Inject constructor(
-    private val authRepo: AuthRepositoryImpl
-) : AuthTokenProvider {
+class AuthTokenProviderImpl @Inject constructor() : AuthTokenProvider {
 
     private var cachedToken: String? = null
 

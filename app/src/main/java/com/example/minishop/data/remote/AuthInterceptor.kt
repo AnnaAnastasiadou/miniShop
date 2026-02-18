@@ -5,10 +5,10 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class AuthInterceptor(
-    private val sessionManager: AuthTokenProvider
+    private val tokenProvider: AuthTokenProvider
 ): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = sessionManager.getToken()
+        val token = tokenProvider.getToken()
 
         val request = if (token.isNullOrBlank()) {
             chain.request()
