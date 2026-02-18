@@ -17,12 +17,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.minishop.R
+import com.example.minishop.feature.cart.CartScreen
+import com.example.minishop.feature.products.details.ProductDetailsScreen
+import com.example.minishop.feature.products.favorites.FavoriteProductsScreen
+import com.example.minishop.feature.products.home.HomeScreen
+import com.example.minishop.feature.profile.ProfileScreen
 
 sealed class RootRoute(
     val route: String
@@ -52,9 +59,11 @@ fun ShopRootNavHost(
     ) {
         composable(route = RootRoute.LogIn.route) {}
         composable (route = RootRoute.Main.route) {
-            MainScreen()
+            MainScreen(onProductClick = {rootNavController.navigate(RootRoute.Details.route)})
         }
-        composable (route = RootRoute.Details.route) {}
+        composable (route = RootRoute.Details.route) {
+            ProductDetailsScreen(onBack = {rootNavController.popBackStack()})
+        }
     }
 }
 
@@ -62,6 +71,7 @@ fun ShopRootNavHost(
 fun TabsNavHost(
     navController: NavHostController,
     startDestination: TabRoutes,
+    onProductClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -69,25 +79,40 @@ fun TabsNavHost(
         startDestination = startDestination.route,
         modifier = modifier.fillMaxSize()
     ) {
-        composable(TabRoutes.HOME.route) {}
-        composable(TabRoutes.FAVORITES.route) {}
-        composable(TabRoutes.CART.route) {}
-        composable(TabRoutes.PROFILE.route) {}
+        composable(TabRoutes.HOME.route) {
+            HomeScreen(onProductClick = onProductClick)
+        }
+        composable(TabRoutes.FAVORITES.route) {
+            FavoriteProductsScreen()
+        }
+        composable(TabRoutes.CART.route) {
+            CartScreen()
+        }
+        composable(TabRoutes.PROFILE.route) {
+            ProfileScreen()
+        }
     }
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(
+    onProductClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val navController = rememberNavController()
     val startDestination = TabRoutes.HOME
-    var selectedDestination by rememberSaveable() { mutableStateOf(startDestination.ordinal) }
+
+    // Observe nav state so the selected tab updates automatically,
+    // even when the back button is clicked
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
         modifier = modifier, bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 TabRoutes.entries.forEachIndexed { index, destination ->
                     NavigationBarItem(
-                        selected = selectedDestination == index,
+                        selected = currentDestination?.hierarchy?.any {it.route == destination.route} == true,
                         onClick = {
                             navController.navigate(route = destination.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -96,7 +121,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                            selectedDestination = index
+//                            selectedDestination = index
                                   },
                         icon = {
                             Icon(
@@ -108,6 +133,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     ) { contentPadding ->
-        TabsNavHost(navController, startDestination, modifier.padding(contentPadding))
+        TabsNavHost(
+            navController,
+            startDestination,
+            onProductClick,
+            modifier.padding(contentPadding))
     }
 }
