@@ -13,11 +13,23 @@ suspend fun  <T> safeCall(call: suspend () -> Response<T>): NetworkResult<T> {
         val body = response.body()
         if (response.isSuccessful && body!=null) {
             NetworkResult.Success(body)
-        } else if( response.errorBody() != null) {
-            val message = JSONObject(response.errorBody()!!.charStream().readText()).getString("message")
-            NetworkResult.Error(message)
         } else {
-            NetworkResult.Error("An Unexpected Error Occurred")
+            val errorBodyString = response.errorBody()?.string()
+            val message = try {
+                if (!errorBodyString.isNullOrBlank()) {
+                    val trimmed = errorBodyString.trim()
+                    if(trimmed.startsWith("{")) {
+                        JSONObject(trimmed).optString("message", trimmed)
+                    } else {
+                        trimmed
+                    }
+                } else {
+                    "An Unexpected Error Occurred"
+                }
+            } catch (e: Exception) {
+                errorBodyString ?: "An Unexpected Error Occurred"
+            }
+            NetworkResult.Error(message)
         }
     } catch(e: ConnectException) {
         NetworkResult.Error(message = "Unable to reach server")
