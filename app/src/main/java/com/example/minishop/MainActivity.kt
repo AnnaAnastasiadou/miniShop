@@ -18,9 +18,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val loggedIn = authRepository.isLoggedIn()
         setContent {
             MiniShopTheme {
+                val loggedIn = authRepository.isLoggedIn()
                 ShopRootNavHost(loggedIn)
             }
         }

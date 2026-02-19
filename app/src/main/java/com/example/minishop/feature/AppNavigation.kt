@@ -61,13 +61,20 @@ fun ShopRootNavHost(
         modifier = modifier
     ) {
         composable(route = RootRoute.LogIn.route) {
-            LogInScreen(onLogin = {rootNavController.navigate(RootRoute.Main.route)})
+            LogInScreen(
+                onLogin = {
+                    rootNavController.navigate(RootRoute.Main.route) {
+                        popUpTo(RootRoute.LogIn.route) {inclusive = true}
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
         }
-        composable (route = RootRoute.Main.route) {
-            MainScreen(onProductClick = {rootNavController.navigate(RootRoute.Details.route)})
+        composable(route = RootRoute.Main.route) {
+            MainScreen(onProductClick = { rootNavController.navigate(RootRoute.Details.route) })
         }
-        composable (route = RootRoute.Details.route) {
-            ProductDetailsScreen(onBack = {rootNavController.popBackStack()})
+        composable(route = RootRoute.Details.route) {
+            ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
         }
     }
 }
@@ -117,7 +124,7 @@ fun MainScreen(
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 TabRoutes.entries.forEachIndexed { index, destination ->
                     NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any {it.route == destination.route} == true,
+                        selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
                         onClick = {
                             navController.navigate(route = destination.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -126,8 +133,7 @@ fun MainScreen(
                                 launchSingleTop = true
                                 restoreState = true
                             }
-//                            selectedDestination = index
-                                  },
+                        },
                         icon = {
                             Icon(
                                 painter = painterResource(destination.iconRes),
@@ -142,6 +148,7 @@ fun MainScreen(
             navController,
             startDestination,
             onProductClick,
-            modifier.padding(contentPadding))
+            modifier.padding(contentPadding)
+        )
     }
 }
