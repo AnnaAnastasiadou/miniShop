@@ -41,9 +41,14 @@ class AuthRepositoryImpl @Inject constructor(
         tokenProvider.clearToken()
     }
 
-    override suspend fun isLoggedIn(): Boolean = withContext(Dispatchers.IO) {
-        sharedPreferencesDatasource.getToken() != null
+    override fun isLoggedIn(): Boolean {
+        var token = tokenProvider.getToken()
+        if (token == null) {
+            sharedPreferencesDatasource.getToken()?.let {
+                token = it
+                tokenProvider.setToken(token)
+            }
+        }
+        return token != null
     }
-
-
 }

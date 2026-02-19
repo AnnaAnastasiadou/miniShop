@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.minishop.R
 import com.example.minishop.feature.cart.CartScreen
+import com.example.minishop.feature.login.LogInScreen
 import com.example.minishop.feature.products.details.ProductDetailsScreen
 import com.example.minishop.feature.products.favorites.FavoriteProductsScreen
 import com.example.minishop.feature.products.home.HomeScreen
@@ -50,14 +51,18 @@ enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
 
 @Composable
 fun ShopRootNavHost(
+    isLoggedIn: Boolean,
     modifier: Modifier = Modifier.statusBarsPadding()
 ) {
     val rootNavController = rememberNavController()
+    val startDestination = if (isLoggedIn) RootRoute.Main.route else RootRoute.LogIn.route
     NavHost(
-        navController = rootNavController, startDestination = RootRoute.Main.route,
+        navController = rootNavController, startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(route = RootRoute.LogIn.route) {}
+        composable(route = RootRoute.LogIn.route) {
+            LogInScreen(onLogin = {rootNavController.navigate(RootRoute.Main.route)})
+        }
         composable (route = RootRoute.Main.route) {
             MainScreen(onProductClick = {rootNavController.navigate(RootRoute.Details.route)})
         }

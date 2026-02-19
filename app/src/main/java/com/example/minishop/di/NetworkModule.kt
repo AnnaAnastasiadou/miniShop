@@ -29,6 +29,7 @@ class NetworkModule {
     }
 
     @Provides
+    @Singleton
     fun provideAuthInterceptor(tokenProvider: AuthTokenProvider): AuthInterceptor =
         AuthInterceptor(tokenProvider)
 
@@ -65,4 +66,5 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideCategoryApi(retrofit: Retrofit) : CategoryApi = retrofit.create(CategoryApi::class.java)
+
 }
