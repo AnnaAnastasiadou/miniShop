@@ -133,7 +133,7 @@ fun LogInContent(
     }
 
     LaunchedEffect(uiState.success) {
-        if (!uiState.success) {
+        if (uiState.success) {
             onLogin()
         }
     }
