@@ -6,6 +6,7 @@ import com.example.minishop.data.mapper.toProduct
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.repository.category.CategoryRepository
 import com.example.minishop.data.repository.products.ProductsRepository
+import com.example.minishop.feature.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +21,9 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var groupedProducts: Map<String, List<Product>> = emptyMap()
+    private var allProducts: List<Product> = emptyList()
 
     init {
         loadCategories()
@@ -39,7 +43,7 @@ class HomeViewModel @Inject constructor(
             }
             when (val response = categoryRepository.getCategories()) {
                 is NetworkResult.Success -> {
-                    val categories = response.data
+                    val categories = listOf("all") + response.data
                     _uiState.update {
                         it.copy(
                             categoriesUiState = it.categoriesUiState.copy(
@@ -68,11 +72,19 @@ class HomeViewModel @Inject constructor(
 
     fun loadProducts() {
         viewModelScope.launch {
-            _uiState.update { it.copy(productsUiState = it.productsUiState.copy(isLoading = true, data = null, error = null))
+            _uiState.update {
+                it.copy(
+                    productsUiState = it.productsUiState.copy(
+                        isLoading = true,
+                        data = null,
+                        error = null
+                    )
+                )
             }
             when (val response = productsRepository.getAllProducts()) {
                 is NetworkResult.Success -> {
-                    val products = response.data.map{it.toProduct()}
+                    val products = response.data.map { it.toProduct() }
+                    groupedProducts = products.groupBy { it.category.lowercase() }
                     _uiState.update {
                         it.copy(
                             productsUiState = it.productsUiState.copy(
@@ -82,6 +94,7 @@ class HomeViewModel @Inject constructor(
                             )
                         )
                     }
+                    allProducts = products
                 }
 
                 is NetworkResult.Error -> {
@@ -98,4 +111,15 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadProductsByCategory(category: String = "all") {
+        val categoryLower = category.lowercase()
+        if (categoryLower == "all") {
+            _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+            return
+        }
+        val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
+        _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts)) }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.minishop.feature.products.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +29,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -46,16 +52,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(),
-    onProductClick: () -> Unit
+    viewModel: HomeViewModel = hiltViewModel(), onProductClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreenContent(uiState)
+    val onCategoryClick: (String) -> Unit = { viewModel.loadProductsByCategory(category = it) }
+    HomeScreenContent(uiState, onCategoryClick)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(uiState: HomeUiState) {
+fun HomeScreenContent(
+    uiState: HomeUiState, onCategoryClick: (String) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,8 +73,7 @@ fun HomeScreenContent(uiState: HomeUiState) {
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
-    ) {
+        }) {
         Column(modifier = Modifier.padding(it)) {
             val isLoading = uiState.categoriesUiState.isLoading || uiState.productsUiState.isLoading
             if (isLoading) {
@@ -78,14 +85,17 @@ fun HomeScreenContent(uiState: HomeUiState) {
                 ) { LinearProgressIndicator(Modifier.fillMaxWidth()) }
 
             }
-            Categories(uiState.categoriesUiState)
+            Categories(uiState.categoriesUiState, onCategoryClick)
             ProductList(uiState.productsUiState)
         }
     }
 }
 
 @Composable
-fun Categories(categoriesUiState: CategoriesUiState) {
+fun Categories(
+    categoriesUiState: CategoriesUiState, onCategoryClick: (String) -> Unit
+) {
+    var selectedCategory by remember { mutableStateOf("all") }
     when {
         categoriesUiState.error != null -> {
             Row(
@@ -102,11 +112,24 @@ fun Categories(categoriesUiState: CategoriesUiState) {
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                items(categoriesUiState.data) { item ->
+                items(categoriesUiState.data) { category ->
+                    val categoryLowerCase = category.lowercase()
+                    val isSelected = selectedCategory == categoryLowerCase
                     Text(
-                        text = item.lowercase().replaceFirstChar { char -> char.uppercase() },
-                        modifier = Modifier.padding(16.dp)
-                    )
+                        text = categoryLowerCase.replaceFirstChar { char -> char.uppercase() },
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background( if(isSelected)MaterialTheme.colorScheme.primary else Color.Transparent)
+                            .clickable {
+                                onCategoryClick(categoryLowerCase)
+                                selectedCategory = categoryLowerCase
+                            }
+                            .padding(vertical = 8.dp, horizontal = 16.dp))
                 }
             }
         }
@@ -160,8 +183,7 @@ fun ProductCard(product: Product) {
                     .background(Color.White)
             )
             Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -186,17 +208,9 @@ fun ProductCard(product: Product) {
     }
 }
 
-//val dummyCategories = listOf(
-//    Category("electronics"),
-//    Category("jewelery"),
-//    Category("men's clothing"),
-//    Category("women's clothing")
-//)
+
 val dummyCategories = listOf(
-    "electronics",
-    "jewelery",
-    "men's clothing",
-    "women's clothing"
+    "all", "electronics", "jewelery", "men's clothing", "women's clothing"
 )
 
 val dummyProducts = listOf(
@@ -208,8 +222,7 @@ val dummyProducts = listOf(
         description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
         imagePath = null,
         isFavorite = true,
-    ),
-    Product(
+    ), Product(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -217,8 +230,7 @@ val dummyProducts = listOf(
         description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
         imagePath = null,
         isFavorite = false,
-    ),
-    Product(
+    ), Product(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -226,8 +238,7 @@ val dummyProducts = listOf(
         description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
         imagePath = null,
         isFavorite = true,
-    ),
-    Product(
+    ), Product(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -235,8 +246,7 @@ val dummyProducts = listOf(
         description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
         imagePath = null,
         isFavorite = false,
-    ),
-    Product(
+    ), Product(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -244,8 +254,7 @@ val dummyProducts = listOf(
         description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
         imagePath = null,
         isFavorite = true,
-    ),
-    Product(
+    ), Product(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -261,8 +270,6 @@ val dummyProducts = listOf(
 fun PreviewHomeContent() {
     HomeScreenContent(
         uiState = HomeUiState(
-            CategoriesUiState(data = dummyCategories),
-            ProductsUiState(data = dummyProducts)
-        )
-    )
+            CategoriesUiState(data = dummyCategories), ProductsUiState(data = dummyProducts)
+        ), onCategoryClick = {})
 }
