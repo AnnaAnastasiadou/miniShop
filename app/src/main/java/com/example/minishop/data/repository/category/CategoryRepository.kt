@@ -4,5 +4,5 @@ import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.category.CategoryDto
 
 interface CategoryRepository {
-    suspend fun getCategories(): NetworkResult<List<CategoryDto>>
+    suspend fun getCategories(): NetworkResult<List<String>>
 }

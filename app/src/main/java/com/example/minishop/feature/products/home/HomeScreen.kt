@@ -2,6 +2,7 @@ package com.example.minishop.feature.products.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,14 +16,17 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -32,20 +36,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.feature.Product
+import dagger.hilt.android.lifecycle.HiltViewModel
+
 
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
     onProductClick: () -> Unit
 ) {
-    HomeScreenContent()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    HomeScreenContent(uiState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent() {
+fun HomeScreenContent(uiState: HomeUiState) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,18 +68,71 @@ fun HomeScreenContent() {
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
+            val isLoading = uiState.categoriesUiState.isLoading || uiState.productsUiState.isLoading
+            if (isLoading) {
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) { LinearProgressIndicator(Modifier.fillMaxWidth()) }
+
+            }
+            Categories(uiState.categoriesUiState)
+            ProductList(uiState.productsUiState)
+        }
+    }
+}
+
+@Composable
+fun Categories(categoriesUiState: CategoriesUiState) {
+    when {
+        categoriesUiState.error != null -> {
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) { Text(categoriesUiState.error, color = MaterialTheme.colorScheme.error) }
+        }
+
+        categoriesUiState.data != null -> {
             LazyRow(
-                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                items(dummyCategories) { item ->
-                    Text(text = item.lowercase().replaceFirstChar { char -> char.uppercase() }, modifier = Modifier.padding(16.dp))
+                items(categoriesUiState.data) { item ->
+                    Text(
+                        text = item.lowercase().replaceFirstChar { char -> char.uppercase() },
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ProductList(productsUiState: ProductsUiState) {
+    when {
+        productsUiState.error != null -> {
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) { Text(productsUiState.error, color = MaterialTheme.colorScheme.error) }
+        }
+
+        productsUiState.data != null -> {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                items(dummyProducts) {product ->
+                items(productsUiState.data) { product ->
                     ProductCard(product)
                 }
             }
@@ -90,13 +153,16 @@ fun ProductCard(product: Product) {
                 contentDescription = null,
                 placeholder = painterResource(R.drawable.ic_broken_image),
                 fallback = painterResource(R.drawable.ic_broken_image),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(150.dp)
                     .fillMaxWidth()
                     .background(Color.White)
             )
-            Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = product.title,
@@ -107,7 +173,7 @@ fun ProductCard(product: Product) {
                     )
                     if (product.isFavorite) {
                         Icon(
-                            painter = painterResource(id =R.drawable.ic_heart),
+                            painter = painterResource(id = R.drawable.ic_heart),
                             contentDescription = null,
                             tint = Color.Red,
                             modifier = Modifier.size(16.dp)
@@ -120,7 +186,13 @@ fun ProductCard(product: Product) {
     }
 }
 
-val dummyCategories = arrayOf(
+//val dummyCategories = listOf(
+//    Category("electronics"),
+//    Category("jewelery"),
+//    Category("men's clothing"),
+//    Category("women's clothing")
+//)
+val dummyCategories = listOf(
     "electronics",
     "jewelery",
     "men's clothing",
@@ -187,5 +259,10 @@ val dummyProducts = listOf(
 @Preview
 @Composable
 fun PreviewHomeContent() {
-    HomeScreenContent()
+    HomeScreenContent(
+        uiState = HomeUiState(
+            CategoriesUiState(data = dummyCategories),
+            ProductsUiState(data = dummyProducts)
+        )
+    )
 }
