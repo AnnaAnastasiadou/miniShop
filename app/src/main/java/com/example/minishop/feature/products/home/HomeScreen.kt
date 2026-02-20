@@ -55,7 +55,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(), onProductClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val onCategoryClick: (String) -> Unit = { viewModel.loadProductsByCategory(category = it) }
+    val onCategoryClick: (String) -> Unit =
+        { viewModel.onEvent(HomeScreenUiEvent.OnCategorySelected(category = it)) }
     HomeScreenContent(uiState, onCategoryClick)
 }
 
@@ -124,7 +125,7 @@ fun Categories(
                         modifier = Modifier
                             .padding(8.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background( if(isSelected)MaterialTheme.colorScheme.primary else Color.Transparent)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                             .clickable {
                                 onCategoryClick(categoryLowerCase)
                                 selectedCategory = categoryLowerCase

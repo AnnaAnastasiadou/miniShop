@@ -112,14 +112,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun loadProductsByCategory(category: String = "all") {
-        val categoryLower = category.lowercase()
-        if (categoryLower == "all") {
-            _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
-            return
+    fun onEvent(event: HomeScreenUiEvent) {
+        when(event) {
+            is HomeScreenUiEvent.OnCategorySelected -> {
+                val categoryLower = event.category.lowercase()
+                if (categoryLower == "all") {
+                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+                    return
+                }
+                val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
+                _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts)) }
+            }
+            is HomeScreenUiEvent.OnSearch -> TODO()
+            HomeScreenUiEvent.OnClear -> TODO()
         }
-        val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
-        _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts)) }
     }
-
 }
