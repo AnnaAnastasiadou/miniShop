@@ -32,4 +32,10 @@ class FavoritesRepositoryImpl @Inject constructor(private val datasource: Favori
             datasource.favorites
         }
     }
+
+    override suspend fun isFavorite(productId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            datasource.getFavoriteById(productId) != null
+        }
+    }
 }
