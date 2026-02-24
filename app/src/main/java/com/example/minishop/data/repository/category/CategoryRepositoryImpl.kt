@@ -8,6 +8,6 @@ import javax.inject.Inject
 
 class CategoryRepositoryImpl @Inject constructor(private val categoryApi: CategoryApi) :
     CategoryRepository {
-    override suspend fun getCategories(): NetworkResult<List<CategoryDto>> =
+    override suspend fun getCategories(): NetworkResult<List<String>> =
         safeCall { categoryApi.getCategories() }
 }
