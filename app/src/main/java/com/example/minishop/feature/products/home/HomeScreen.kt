@@ -21,10 +21,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,18 +59,66 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onCategoryClick: (String) -> Unit =
         { viewModel.onEvent(HomeScreenUiEvent.OnCategorySelected(category = it)) }
-    HomeScreenContent(uiState, onCategoryClick)
+    val onSearch: (String) -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnSearch(it))}
+    val onClear: () -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnClear)}
+    HomeScreenContent(uiState, onCategoryClick, onSearch, onClear)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
-    uiState: HomeUiState, onCategoryClick: (String) -> Unit
+    uiState: HomeUiState, onCategoryClick: (String) -> Unit, onSearch: (String) -> Unit, onClear: () -> Unit
 ) {
+    var isSearchBarActive by remember {mutableStateOf(false)}
+    var searchQuery by remember {mutableStateOf("")}
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MiniShop", fontWeight = FontWeight.Bold, fontSize = 24.sp) },
+                title = {
+                    if (isSearchBarActive) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = {
+                                searchQuery = it
+                                onSearch(searchQuery)
+                            },
+                            singleLine = true,
+                            placeholder = {Text("Search products...")},
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text("MiniShop", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                    }
+                },
+                actions = {
+                    if (isSearchBarActive) {
+                        IconButton(
+                            onClick = {
+                                isSearchBarActive = false
+                                onClear()
+                                searchQuery = ""
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_close),
+                                contentDescription = "Close search",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                isSearchBarActive = true
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_search),
+                                contentDescription = "Search",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -272,5 +322,5 @@ fun PreviewHomeContent() {
     HomeScreenContent(
         uiState = HomeUiState(
             CategoriesUiState(data = dummyCategories), ProductsUiState(data = dummyProducts)
-        ), onCategoryClick = {})
+        ), onCategoryClick = {}, onSearch = {}, onClear = {})
 }

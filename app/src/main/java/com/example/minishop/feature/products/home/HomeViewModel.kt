@@ -23,11 +23,13 @@ class HomeViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private var groupedProducts: Map<String, List<Product>> = emptyMap()
-    private var allProducts: List<Product> = emptyList()
+    private var allProducts: List<Product>? = null
+    private var currentCategoryProducts: List<Product>? = null
 
     init {
         loadCategories()
-        loadProducts()
+//        loadProducts()
+        onEvent(HomeScreenUiEvent.OnCategorySelected("all"))
     }
 
     fun loadCategories() {
@@ -95,6 +97,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                     allProducts = products
+                    currentCategoryProducts = products
                 }
 
                 is NetworkResult.Error -> {
@@ -113,18 +116,32 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onEvent(event: HomeScreenUiEvent) {
-        when(event) {
+        when (event) {
             is HomeScreenUiEvent.OnCategorySelected -> {
                 val categoryLower = event.category.lowercase()
                 if (categoryLower == "all") {
-                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+                    allProducts?.let{products ->
+                        _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = products)) }
+                    }
+                    loadProducts()
+//                    currentCategoryProducts = allProducts
                     return
                 }
                 val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
                 _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts)) }
+                currentCategoryProducts = filteredProducts
             }
-            is HomeScreenUiEvent.OnSearch -> TODO()
-            HomeScreenUiEvent.OnClear -> TODO()
+
+            is HomeScreenUiEvent.OnSearch -> {
+                uiState.value.productsUiState.data?.let{ data ->
+                    val searchedProducts = currentCategoryProducts?.filter { it.title.lowercase().contains(event.query.lowercase()) }
+                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = searchedProducts)) }
+                }
+            }
+
+            HomeScreenUiEvent.OnClear -> {
+                _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+            }
         }
     }
 }
