@@ -142,7 +142,9 @@ fun ProductDetailsContent(product: Product, onBack: () -> Unit, onFavorite: () -
                         )
                     }
                 } else {
-                    QuantitySelector(product)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        QuantitySelector(product)
+                    }
                 }
             }
         }
@@ -151,54 +153,54 @@ fun ProductDetailsContent(product: Product, onBack: () -> Unit, onFavorite: () -
 
 @Composable
 fun QuantitySelector(product: Product) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                Modifier
-                    .wrapContentWidth()
-                    .height(48.dp)
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline,
-                        RectangleShape
-                    ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier.size(48.dp),
 
-                    ) { Icon(painterResource(R.drawable.ic_minus), "Reduce item") }
-                VerticalDivider(
-                    modifier = Modifier.fillMaxHeight(),
-                    color = MaterialTheme.colorScheme.outline
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier
+                .wrapContentWidth()
+                .height(48.dp)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline,
+                    RectangleShape
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(48.dp),
+
+                ) { Icon(painterResource(R.drawable.ic_minus), "Reduce item") }
+            VerticalDivider(
+                modifier = Modifier.fillMaxHeight(),
+                color = MaterialTheme.colorScheme.outline
+            )
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    product.inCart.toString(),
+                    style = MaterialTheme.typography.titleMedium
                 )
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(MaterialTheme.colorScheme.background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        product.inCart.toString(),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                VerticalDivider(
-                    modifier = Modifier.fillMaxHeight(),
-                    color = MaterialTheme.colorScheme.outline
-                )
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier.size(48.dp),
-                ) { Icon(painterResource(R.drawable.ic_plus), "Increase item") }
             }
-            Button(onClick = {}, shape = RectangleShape, modifier = Modifier.height(48.dp)) {
-                Text("Remove", style = MaterialTheme.typography.labelLarge)
-            }
+            VerticalDivider(
+                modifier = Modifier.fillMaxHeight(),
+                color = MaterialTheme.colorScheme.outline
+            )
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(48.dp),
+            ) { Icon(painterResource(R.drawable.ic_plus), "Increase item") }
+        }
+        Button(onClick = {}, shape = RectangleShape, modifier = Modifier.height(48.dp)) {
+            Text("Remove", style = MaterialTheme.typography.labelLarge)
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

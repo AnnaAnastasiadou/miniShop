@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.minishop.data.mapper.toProduct
 import com.example.minishop.data.remote.NetworkResult
-import com.example.minishop.data.remote.category.CategoryDto
 import com.example.minishop.data.remote.products.ProductDto
 import com.example.minishop.data.repository.category.CategoryRepository
 import com.example.minishop.data.repository.products.ProductsRepository
@@ -36,28 +35,40 @@ class HomeViewModel @Inject constructor(
 
     fun loadData() {
         viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    categoriesUiState = it.categoriesUiState.copy(
+                        isLoading = true,
+                        error = null,
+                        data = null
+                    )
+                )
+            }
+
+            _uiState.update {
+                it.copy(
+                    productsUiState = it.productsUiState.copy(
+                        isLoading = true,
+                        data = null,
+                        error = null
+                    )
+                )
+            }
+
             val categoriesAsync = async { categoryRepository.getCategories() }
             val productAsync = async { productsRepository.getAllProducts() }
 
             val categoriesRes = categoriesAsync.await()
             val productRes = productAsync.await()
 
-
-            loadCategories(categoriesRes)
-            loadProducts(productRes)
+            handleCategories(categoriesRes)
+            handleProducts(productRes)
         }
     }
 
-    private fun loadCategories(categoryRes: NetworkResult<List<String>>) {
-        _uiState.update {
-            it.copy(
-                categoriesUiState = it.categoriesUiState.copy(
-                    isLoading = true,
-                    error = null,
-                    data = null
-                )
-            )
-        }
+    private fun handleCategories(categoryRes: NetworkResult<List<String>>) {
+
         when (categoryRes) {
             is NetworkResult.Success -> {
                 val categories = listOf("all") + categoryRes.data
@@ -86,17 +97,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun handleProducts(productsRes: NetworkResult<List<ProductDto>>) {
 
-    private fun loadProducts(productsRes: NetworkResult<List<ProductDto>>) {
-        _uiState.update {
-            it.copy(
-                productsUiState = it.productsUiState.copy(
-                    isLoading = true,
-                    data = null,
-                    error = null
-                )
-            )
-        }
         when (productsRes) {
             is NetworkResult.Success -> {
                 val products = productsRes.data.map { it.toProduct() }
