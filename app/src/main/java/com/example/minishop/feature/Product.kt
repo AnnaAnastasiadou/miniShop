@@ -7,5 +7,6 @@ data class Product(
     val category: String,
     val description: String,
     val imagePath: String?,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val inCart: Int = 0
 )
