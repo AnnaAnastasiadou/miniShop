@@ -1,5 +1,6 @@
 package com.example.minishop.feature
 
+import android.R.attr.type
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -20,10 +21,12 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.minishop.R
 import com.example.minishop.feature.cart.CartScreen
 import com.example.minishop.feature.login.LogInScreen
@@ -64,17 +67,27 @@ fun ShopRootNavHost(
             LogInScreen(
                 onLogin = {
                     rootNavController.navigate(RootRoute.Main.route) {
-                        popUpTo(RootRoute.LogIn.route) {inclusive = true}
+                        popUpTo(RootRoute.LogIn.route) { inclusive = true }
                         launchSingleTop = true
                         restoreState = true
                     }
                 })
         }
         composable(route = RootRoute.Main.route) {
-            MainScreen(onProductClick = { rootNavController.navigate(RootRoute.Details.route) })
+            MainScreen(onProductClick = { rootNavController.navigate(RootRoute.Details.create(it)) })
         }
-        composable(route = RootRoute.Details.route) {
-            ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
+        composable(
+            route = RootRoute.Details.route,
+            arguments = listOf(
+                navArgument("productId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getInt("productId")
+            if (productId != null) {
+                ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
+            }
         }
     }
 }
@@ -83,7 +96,7 @@ fun ShopRootNavHost(
 fun TabsNavHost(
     navController: NavHostController,
     startDestination: TabRoutes,
-    onProductClick: () -> Unit,
+    onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -108,7 +121,7 @@ fun TabsNavHost(
 
 @Composable
 fun MainScreen(
-    onProductClick: () -> Unit,
+    onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()

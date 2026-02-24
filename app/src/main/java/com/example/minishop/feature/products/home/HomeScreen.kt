@@ -54,20 +54,24 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(), onProductClick: () -> Unit
+    viewModel: HomeViewModel = hiltViewModel(), onProductClick: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onCategoryClick: (String) -> Unit =
         { viewModel.onEvent(HomeScreenUiEvent.OnCategorySelected(category = it)) }
     val onSearch: (String) -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnSearch(it))}
     val onClear: () -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnClear)}
-    HomeScreenContent(uiState, onCategoryClick, onSearch, onClear)
+    HomeScreenContent(uiState, onCategoryClick, onSearch, onClear, onProductClick)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
-    uiState: HomeUiState, onCategoryClick: (String) -> Unit, onSearch: (String) -> Unit, onClear: () -> Unit
+    uiState: HomeUiState,
+    onCategoryClick: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    onClear: () -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     var isSearchBarActive by remember {mutableStateOf(false)}
     var searchQuery by remember {mutableStateOf("")}
@@ -137,7 +141,7 @@ fun HomeScreenContent(
 
             }
             Categories(uiState.categoriesUiState, onCategoryClick)
-            ProductList(uiState.productsUiState)
+            ProductList(uiState.productsUiState, onProductClick)
         }
     }
 }
@@ -188,7 +192,7 @@ fun Categories(
 }
 
 @Composable
-fun ProductList(productsUiState: ProductsUiState) {
+fun ProductList(productsUiState: ProductsUiState, onProductClick: (Int) -> Unit) {
     when {
         productsUiState.error != null -> {
             Row(
@@ -207,7 +211,7 @@ fun ProductList(productsUiState: ProductsUiState) {
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 items(productsUiState.data) { product ->
-                    ProductCard(product)
+                    ProductCard(product, onProductClick)
                 }
             }
         }
@@ -215,8 +219,9 @@ fun ProductList(productsUiState: ProductsUiState) {
 }
 
 @Composable
-fun ProductCard(product: Product) {
+fun ProductCard(product: Product, onProductClick: (Int) -> Unit) {
     Card(
+        onClick = { onProductClick(product.id) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
@@ -322,5 +327,5 @@ fun PreviewHomeContent() {
     HomeScreenContent(
         uiState = HomeUiState(
             CategoriesUiState(data = dummyCategories), ProductsUiState(data = dummyProducts)
-        ), onCategoryClick = {}, onSearch = {}, onClear = {})
+        ), onCategoryClick = {}, onSearch = {}, onClear = {}, onProductClick = {})
 }
