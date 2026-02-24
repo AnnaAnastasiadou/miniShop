@@ -28,8 +28,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadCategories()
-//        loadProducts()
-        onEvent(HomeScreenUiEvent.OnCategorySelected("all"))
+        loadProducts()
     }
 
     fun loadCategories() {
@@ -120,11 +119,7 @@ class HomeViewModel @Inject constructor(
             is HomeScreenUiEvent.OnCategorySelected -> {
                 val categoryLower = event.category.lowercase()
                 if (categoryLower == "all") {
-                    allProducts?.let{products ->
-                        _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = products)) }
-                    }
-                    loadProducts()
-//                    currentCategoryProducts = allProducts
+                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
                     return
                 }
                 val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
