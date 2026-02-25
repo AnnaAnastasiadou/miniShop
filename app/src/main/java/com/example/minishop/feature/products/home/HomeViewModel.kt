@@ -42,12 +42,7 @@ class HomeViewModel @Inject constructor(
                         isLoading = true,
                         error = null,
                         data = null
-                    )
-                )
-            }
-
-            _uiState.update {
-                it.copy(
+                    ),
                     productsUiState = it.productsUiState.copy(
                         isLoading = true,
                         data = null,
