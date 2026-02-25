@@ -1,4 +1,4 @@
-package com.example.minishop.data.local
+package com.example.minishop.data.local.model
 
 data class FavoriteProduct(
     val id: Int,
@@ -6,5 +6,5 @@ data class FavoriteProduct(
     val price: Double,
     val category: String,
     val description: String,
-    val imagePath: String
+    val imagePath: String?
 )

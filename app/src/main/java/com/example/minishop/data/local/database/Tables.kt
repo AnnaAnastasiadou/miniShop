@@ -17,6 +17,25 @@ class Tables {
                 $COLUMN_CATEGORY TEXT,
                 $COLUMN_DESCRIPTION TEXT,
                 $COLUMN_IMAGE_PATH TEXT
+            )
+        """
+    }
+
+    object Cart {
+        const val TABLE_NAME = "cart"
+        const val COLUMN_PRODUCT_ID = "product_id"
+        const val COLUMN_QUANTITY = "quantity"
+        const val COLUMN_TITLE = "title"
+        const val COLUMN_PRICE = "price"
+        const val COLUMN_IMAGE_PATH = "image_path"
+        const val CREATE_TABLE = """
+            CREATE TABLE $TABLE_NAME (
+                $COLUMN_PRODUCT_ID INTEGER PRIMARY KEY,
+                $COLUMN_QUANTITY INTEGER NOT NULL,
+                $COLUMN_TITLE TEXT NOT NULL,
+                $COLUMN_PRICE REAL,
+                $COLUMN_IMAGE_PATH TEXT
+            )
         """
     }
 }

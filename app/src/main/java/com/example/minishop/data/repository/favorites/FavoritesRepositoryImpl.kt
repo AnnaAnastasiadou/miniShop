@@ -1,6 +1,6 @@
 package com.example.minishop.data.repository.favorites
 
-import com.example.minishop.data.local.FavoriteProduct
+import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.local.datasource.FavoriteProductsDatasource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow

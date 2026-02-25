@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -57,8 +59,37 @@ fun ProductDetailsScreen(
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val onFavorite = {}
-    ProductDetailsContent(uiState, onBack, onFavorite)
+    val onFavorite = { viewModel.onEvent(DetailsScreenUiEvent.OnToggleFavorite) }
+    val onAddItem: () -> Unit = { viewModel.onEvent(DetailsScreenUiEvent.OnAddToCart) }
+    val onRemoveItem: (Int) -> Unit =
+        { viewModel.onEvent(DetailsScreenUiEvent.OnRemoveFromCart(it)) }
+    val onIncreaseItem: (Int, Int) -> Unit =
+        { productId, quantity ->
+            viewModel.onEvent(
+                DetailsScreenUiEvent.OnIncreaseQuantity(
+                    productId,
+                    quantity
+                )
+            )
+        }
+    val onDecreaseItem: (Int, Int) -> Unit =
+        { productId, quantity ->
+            viewModel.onEvent(
+                DetailsScreenUiEvent.OnDecreaseQuantity(
+                    productId,
+                    quantity
+                )
+            )
+        }
+    ProductDetailsContent(
+        uiState,
+        onBack,
+        onFavorite,
+        onAddItem = onAddItem,
+        onRemoveItem = onRemoveItem,
+        onIncreaseItem,
+        onDecreaseItem
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,14 +97,17 @@ fun ProductDetailsScreen(
 fun ProductDetailsContent(
     uiState: ProductDetailsUiState,
     onBack: () -> Unit,
-    onFavorite: () -> Unit
+    onFavorite: () -> Unit,
+    onAddItem: () -> Unit,
+    onRemoveItem: (Int) -> Unit,
+    onIncreaseItem: (Int, Int) -> Unit,
+    onDecreaseItem: (Int, Int) -> Unit
 ) {
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("") },
-                navigationIcon = {
+                title = { Text("") }, navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
@@ -81,8 +115,7 @@ fun ProductDetailsContent(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+                }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
@@ -91,8 +124,7 @@ fun ProductDetailsContent(
         when {
             uiState.isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -100,8 +132,7 @@ fun ProductDetailsContent(
 
             uiState.error != null -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "An Error Occurred",
@@ -114,9 +145,12 @@ fun ProductDetailsContent(
 
             uiState.data != null -> {
                 ProductDetailsSuccess(
-                    uiState.data,
+                    product = uiState.data,
                     onFavorite = onFavorite,
-                    onBack = onBack,
+                    onAddItem = onAddItem,
+                    onRemoveItem = onRemoveItem,
+                    onIncreaseItem = onIncreaseItem,
+                    onDecreaseItem = onDecreaseItem,
                     modifier = Modifier.padding(contentPadding)
                 )
             }
@@ -130,12 +164,15 @@ fun ProductDetailsContent(
 @Composable
 fun ProductDetailsSuccess(
     product: Product,
-    onBack: () -> Unit,
     onFavorite: () -> Unit,
+    onAddItem: () -> Unit,
+    onRemoveItem: (Int) -> Unit,
+    onIncreaseItem: (Int, Int) -> Unit,
+    onDecreaseItem: (Int, Int) -> Unit,
     modifier: Modifier
 ) {
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         Box {
             AsyncImage(
                 model = product.imagePath,
@@ -168,8 +205,7 @@ fun ProductDetailsSuccess(
             }
         }
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -187,10 +223,12 @@ fun ProductDetailsSuccess(
             Text(text = product.description)
             if (product.inCart == 0) {
                 Button(
-                    onClick = {}, colors = ButtonDefaults.buttonColors(
+                    onClick = { onAddItem() },
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
-                    ), modifier = Modifier.fillMaxWidth(), shape = RectangleShape
+                    ),
+                    modifier = Modifier.fillMaxWidth(), shape = RectangleShape
                 ) {
                     Text(
                         text = "Add to Cart",
@@ -201,7 +239,7 @@ fun ProductDetailsSuccess(
                 }
             } else {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    QuantitySelector(product)
+                    QuantitySelector(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
                 }
             }
         }
@@ -210,7 +248,9 @@ fun ProductDetailsSuccess(
 
 
 @Composable
-fun QuantitySelector(product: Product) {
+fun QuantitySelector(
+    product: Product, onRemoveItem: (Int) -> Unit, onIncreaseItem: (Int, Int) -> Unit, onDecreaseItem: (Int, Int) -> Unit
+) {
 
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -218,20 +258,16 @@ fun QuantitySelector(product: Product) {
                 .wrapContentWidth()
                 .height(48.dp)
                 .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.outline,
-                    RectangleShape
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                    1.dp, MaterialTheme.colorScheme.outline, RectangleShape
+                ), verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = {},
+                onClick = {onDecreaseItem(product.id, product.inCart)},
                 modifier = Modifier.size(48.dp),
 
                 ) { Icon(painterResource(R.drawable.ic_minus), "Reduce item") }
             VerticalDivider(
-                modifier = Modifier.fillMaxHeight(),
-                color = MaterialTheme.colorScheme.outline
+                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
             )
             Box(
                 modifier = Modifier
@@ -240,20 +276,22 @@ fun QuantitySelector(product: Product) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    product.inCart.toString(),
-                    style = MaterialTheme.typography.titleMedium
+                    product.inCart.toString(), style = MaterialTheme.typography.titleMedium
                 )
             }
             VerticalDivider(
-                modifier = Modifier.fillMaxHeight(),
-                color = MaterialTheme.colorScheme.outline
+                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
             )
             IconButton(
-                onClick = {},
+                onClick = {onIncreaseItem(product.id, product.inCart)},
                 modifier = Modifier.size(48.dp),
             ) { Icon(painterResource(R.drawable.ic_plus), "Increase item") }
         }
-        Button(onClick = {}, shape = RectangleShape, modifier = Modifier.height(48.dp)) {
+        Button(
+            onClick = { onRemoveItem(product.id) },
+            shape = RectangleShape,
+            modifier = Modifier.height(48.dp)
+        ) {
             Text("Remove", style = MaterialTheme.typography.labelLarge)
         }
     }
@@ -264,30 +302,20 @@ fun QuantitySelector(product: Product) {
 @Composable
 fun PreviewProductDetailsSuccess() {
     ProductDetailsContent(
-        uiState = ProductDetailsUiState(data = dummyProduct), onBack = {}, onFavorite = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProductDetailsError() {
-    ProductDetailsContent(
-        uiState = ProductDetailsUiState(error = "An Error Occurred"), onBack = {}, onFavorite = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProductDetailsLoading() {
-    ProductDetailsContent(
-        uiState = ProductDetailsUiState(isLoading = true), onBack = {}, onFavorite = {}
+        uiState = ProductDetailsUiState(data = dummyProduct),
+        onBack = {},
+        onFavorite = {},
+        onRemoveItem = {},
+        onIncreaseItem = { productId, quantity -> },
+        onDecreaseItem = { productId, quantity -> },
+        onAddItem = {}
     )
 }
 
 val dummyProduct = Product(
     id = 1,
     title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
-    price = 109.95,
+    price = "109.95",
     category = "men's clothing",
     description = "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
     imagePath = "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_t.png",

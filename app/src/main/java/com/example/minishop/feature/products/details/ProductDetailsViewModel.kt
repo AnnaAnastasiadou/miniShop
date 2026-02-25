@@ -3,8 +3,11 @@ package com.example.minishop.feature.products.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.minishop.data.local.model.CartProduct
+import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.mapper.toProduct
 import com.example.minishop.data.remote.NetworkResult
+import com.example.minishop.data.repository.cart.CartRepository
 import com.example.minishop.data.repository.favorites.FavoritesRepository
 import com.example.minishop.data.repository.products.ProductsRepository
 import com.example.minishop.feature.Product
@@ -19,8 +22,9 @@ import javax.inject.Inject
 class ProductDetailsViewModel @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
     private val productsRepository: ProductsRepository,
+    private val cartRepository: CartRepository,
     savedStateHandle: SavedStateHandle
-): ViewModel() {
+) : ViewModel() {
     private val productId: Int = savedStateHandle.get<Int>("productId") ?: -1
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState = _uiState.asStateFlow()
@@ -37,10 +41,98 @@ class ProductDetailsViewModel @Inject constructor(
             val productDetails = productsRepository.getProductById(productId)
 
             if (productDetails != null) {
-                _uiState.update { it.copy(isLoading = false, data = productDetails.toProduct(), error = null,) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        data = productDetails.toProduct(),
+                        error = null,
+                    )
+                }
             } else {
-                _uiState.update { it.copy(isLoading = false, data = null, error = "An Error Occurred") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        data = null,
+                        error = "An Error Occurred"
+                    )
+                }
             }
         }
     }
+
+    fun onEvent(event: DetailsScreenUiEvent) {
+        when (event) {
+            is DetailsScreenUiEvent.OnToggleFavorite -> toggleFavorite()
+            is DetailsScreenUiEvent.OnAddToCart -> addToCart()
+            is DetailsScreenUiEvent.OnRemoveFromCart -> onRemoveFromCart(event.productId)
+            is DetailsScreenUiEvent.OnDecreaseQuantity -> onDecreaseQuantity(event.productId, event.quantity)
+            is DetailsScreenUiEvent.OnIncreaseQuantity -> onIncreaseQuantity(event.productId, event.quantity)
+        }
+    }
+
+    fun toggleFavorite() {
+        viewModelScope.launch {
+            val product = _uiState.value.data ?: return@launch
+            if (product.isFavorite) {
+                favoritesRepository.removeFavorite(product.id)
+                _uiState.update {
+                    it.copy(
+                        data = product.copy(isFavorite = false)
+                    )
+                }
+            } else {
+                favoritesRepository.addFavorite(
+                    FavoriteProduct(
+                        id = product.id,
+                        title = product.title,
+                        price = product.price.toDouble(),
+                        category = product.category,
+                        description = product.description,
+                        imagePath = product.imagePath
+                    )
+                )
+                _uiState.update {
+                    it.copy(
+                        data = product.copy(isFavorite = true)
+                    )
+                }
+            }
+        }
+    }
+
+    fun addToCart() {
+        viewModelScope.launch {
+            val product = _uiState.value.data ?: return@launch
+            cartRepository.addItem(
+                CartProduct(
+                    id = product.id,
+                    title = product.title,
+                    price = product.price.toDouble(),
+                    imagePath = product.imagePath,
+                )
+            )
+            _uiState.update { it.copy(data = product.copy(inCart = 1)) }
+        }
+    }
+
+    fun onRemoveFromCart(productId: Int) {
+        viewModelScope.launch {
+            cartRepository.removeItem(productId)
+            _uiState.update { it.copy(data = it.data!!.copy(inCart = 0)) }
+        }
+    }
+    fun onIncreaseQuantity(productId: Int, quantity: Int) {
+        viewModelScope.launch {
+            cartRepository.increaseQuantity(productId, quantity)
+            _uiState.update { it.copy(data = it.data!!.copy(inCart = quantity + 1)) }
+        }
+    }
+
+    fun onDecreaseQuantity(productId: Int, quantity: Int) {
+        viewModelScope.launch {
+            cartRepository.decreaseQuantity(productId, quantity)
+            _uiState.update { it.copy(data = it.data!!.copy(inCart = quantity - 1)) }
+        }
+    }
+
 }

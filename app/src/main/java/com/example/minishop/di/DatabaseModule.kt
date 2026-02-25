@@ -2,6 +2,8 @@ package com.example.minishop.di
 
 import android.content.Context
 import com.example.minishop.data.local.database.MySqliteOpenHelper
+import com.example.minishop.data.local.datasource.CartDatasource
+import com.example.minishop.data.local.datasource.CartDatasourceImpl
 import com.example.minishop.data.local.datasource.FavoriteProductsDatasource
 import dagger.Module
 import dagger.Provides
@@ -24,4 +26,5 @@ class DatabaseModule {
     fun providesFavoriteProductsDatasource( mySqliteOpenHelper: MySqliteOpenHelper ): FavoriteProductsDatasource {
         return FavoriteProductsDatasource(mySqliteOpenHelper)
     }
+
 }

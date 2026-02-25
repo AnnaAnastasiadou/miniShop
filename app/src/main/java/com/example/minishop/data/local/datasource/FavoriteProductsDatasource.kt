@@ -1,7 +1,7 @@
 package com.example.minishop.data.local.datasource
 
 import android.content.ContentValues
-import com.example.minishop.data.local.FavoriteProduct
+import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.local.database.MySqliteOpenHelper
 import com.example.minishop.data.local.database.Tables
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -8,7 +8,7 @@ fun ProductDto.toProduct(isFav: Boolean = false): Product {
     return Product(
         id = id,
         title = title,
-        price = price,
+        price = "%.2f".format(price),
         category = category,
         description = description,
         imagePath = image,
