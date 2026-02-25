@@ -59,6 +59,27 @@ class CartDatasourceImpl @Inject constructor(val dbHelper: MySqliteOpenHelper) :
         }
     }
 
+    override fun getQuantityById(productId: Int): Int? {
+        val db = dbHelper.readableDatabase
+
+        val columns = arrayOf(Tables.Cart.COLUMN_QUANTITY)
+        val cursor = db.query(
+            Tables.Cart.TABLE_NAME,
+            columns,
+            "${Tables.Cart.COLUMN_PRODUCT_ID} = ?",
+            arrayOf(productId.toString()),
+            null,
+            null,
+            null
+        )
+        cursor.use {
+            while (it.moveToNext()) {
+                return it.getInt(it.getColumnIndexOrThrow(Tables.Cart.COLUMN_QUANTITY))
+            }
+        }
+        return null
+    }
+
     override fun clearCart() {
         val db = dbHelper.writableDatabase
         db.delete(Tables.Cart.TABLE_NAME, null, null)

@@ -8,6 +8,7 @@ interface CartDatasource {
     fun addItem(cartProduct: CartProduct)
     fun removeItem(productId: Int)
     fun updateQuantity(productId: Int, newQuantity: Int)
+    fun getQuantityById(productId: Int): Int?
     fun clearCart()
     fun getCartItems(): List<CartProduct>
 }

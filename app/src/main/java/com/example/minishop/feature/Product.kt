@@ -8,5 +8,5 @@ data class Product(
     val description: String,
     val imagePath: String?,
     val isFavorite: Boolean,
-    val inCart: Int = 0
+    val inCart: Int
 )

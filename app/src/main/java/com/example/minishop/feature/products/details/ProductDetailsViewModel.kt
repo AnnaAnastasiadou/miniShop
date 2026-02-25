@@ -39,12 +39,13 @@ class ProductDetailsViewModel @Inject constructor(
                 it.copy(isLoading = true, data = null, error = null)
             }
             val productDetails = productsRepository.getProductById(productId)
+            val quantity = cartRepository.getQuantityById(productId)
 
             if (productDetails != null) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        data = productDetails.toProduct(),
+                        data = productDetails.toProduct(quantity = quantity ?: 0),
                         error = null,
                     )
                 }

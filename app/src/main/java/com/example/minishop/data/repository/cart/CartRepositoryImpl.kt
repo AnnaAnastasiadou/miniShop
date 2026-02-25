@@ -29,6 +29,11 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getQuantityById(productId: Int): Int = withContext(Dispatchers.IO) {
+        return@withContext cartDatasource.getQuantityById(productId) ?: 0
+    }
+
+
     override suspend fun increaseQuantity(productId: Int, quantity: Int) {
         withContext(Dispatchers.IO) {
             cartDatasource.updateQuantity(productId, quantity + 1)
