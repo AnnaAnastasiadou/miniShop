@@ -1,6 +1,6 @@
 package com.example.minishop.data.repository.favorites
 
-import com.example.minishop.data.local.FavoriteProduct
+import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.local.datasource.FavoriteProductsDatasource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +30,12 @@ class FavoritesRepositoryImpl @Inject constructor(private val datasource: Favori
     override suspend fun favoriteProducts(): StateFlow<List<FavoriteProduct>> {
         return withContext(Dispatchers.IO) {
             datasource.favorites
+        }
+    }
+
+    override suspend fun isFavorite(productId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            datasource.getFavoriteById(productId) != null
         }
     }
 }

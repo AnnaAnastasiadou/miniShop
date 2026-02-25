@@ -13,6 +13,7 @@ class MySqliteOpenHelper(private val context: Context) :
 
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL(Tables.Favorites.CREATE_TABLE)
+        db?.execSQL(Tables.Cart.CREATE_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}

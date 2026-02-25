@@ -4,14 +4,15 @@ import com.example.minishop.data.remote.products.ProductDto
 import com.example.minishop.feature.Product
 import com.example.minishop.feature.products.home.Category
 
-fun ProductDto.toProduct(isFav: Boolean = false): Product {
+fun ProductDto.toProduct(isFav: Boolean = false, quantity: Int = 0): Product {
     return Product(
         id = id,
         title = title,
-        price = price,
+        price = "%.2f".format(price),
         category = category,
         description = description,
         imagePath = image,
-        isFavorite = isFav
+        isFavorite = isFav,
+        inCart = quantity
     )
 }

@@ -1,5 +1,7 @@
 package com.example.minishop.di
 
+import com.example.minishop.data.local.datasource.CartDatasource
+import com.example.minishop.data.local.datasource.CartDatasourceImpl
 import com.example.minishop.data.local.datasource.SharedPreferencesDatasource
 import com.example.minishop.data.local.datasource.SharedPreferencesDatasourceImpl
 import dagger.Binds
@@ -16,4 +18,10 @@ abstract class DataSourceModule {
     abstract fun bindSharedPreferencesDatasource(
         sharedPreferencesDatasourceImpl: SharedPreferencesDatasourceImpl
     ) : SharedPreferencesDatasource
+
+    @Binds
+    @Singleton
+    abstract fun bindCartDatasource(
+        cartDatasourceImpl: CartDatasourceImpl
+    ) : CartDatasource
 }

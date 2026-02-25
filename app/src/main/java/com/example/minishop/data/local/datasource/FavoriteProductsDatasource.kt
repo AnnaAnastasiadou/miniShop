@@ -1,7 +1,7 @@
 package com.example.minishop.data.local.datasource
 
 import android.content.ContentValues
-import com.example.minishop.data.local.FavoriteProduct
+import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.local.database.MySqliteOpenHelper
 import com.example.minishop.data.local.database.Tables
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,7 +80,7 @@ class FavoriteProductsDatasource(val dbHelper: MySqliteOpenHelper) {
 
     }
 
-    fun getFavoriteById(productId: Int) {
+    fun getFavoriteById(productId: Int): FavoriteProduct? {
         val db = dbHelper.readableDatabase
 
         val projection = arrayOf(
@@ -101,6 +101,21 @@ class FavoriteProductsDatasource(val dbHelper: MySqliteOpenHelper) {
             null,
             null
         )
+
+        cursor.use {
+            if (it.moveToNext()) {
+                return FavoriteProduct(
+                    id = it.getInt(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_PRODUCT_ID)),
+                    title = it.getString(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_TITLE)),
+                    price = it.getDouble(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_PRICE)),
+                    category = it.getString(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_CATEGORY)),
+                    description = it.getString(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_DESCRIPTION)),
+                    imagePath = it.getString(it.getColumnIndexOrThrow(Tables.Favorites.COLUMN_IMAGE_PATH))
+                )
+            }
+        }
+
+        return null
     }
 
 }
