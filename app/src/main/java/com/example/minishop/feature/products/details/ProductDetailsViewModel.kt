@@ -40,12 +40,13 @@ class ProductDetailsViewModel @Inject constructor(
             }
             val productDetails = productsRepository.getProductById(productId)
             val quantity = cartRepository.getQuantityById(productId)
+            val isFav = favoritesRepository.isFavorite(productId)
 
             if (productDetails != null) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        data = productDetails.toProduct(quantity = quantity ?: 0),
+                        data = productDetails.toProduct(isFav = isFav, quantity = quantity),
                         error = null,
                     )
                 }
