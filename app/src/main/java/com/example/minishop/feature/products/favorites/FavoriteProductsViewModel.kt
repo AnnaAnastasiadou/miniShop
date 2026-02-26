@@ -26,8 +26,8 @@ class FavoriteProductsViewModel @Inject constructor(
         .map { products -> FavoriteProductsUiState(data = products) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(500L),
+            started = SharingStarted.WhileSubscribed(5000L),
             initialValue = FavoriteProductsUiState()
-        )
+    )
 
 }
