@@ -27,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,20 +39,30 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.feature.Product
 
 @Composable
-fun FavoriteProductsScreen() {
-    val uiState = FavoriteProductsUiState(data = dummyProducts)
-    FavoriteProductsContent(uiState)
+fun FavoriteProductsScreen(
+    viewModel: FavoriteProductsViewModel = hiltViewModel(),
+    onBackToProducts: () -> Unit,
+    onProductClick: (Int) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    FavoriteProductsContent(uiState, onProductClick, onBackToProducts)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteProductsContent(uiState: FavoriteProductsUiState) {
+fun FavoriteProductsContent(
+    uiState: FavoriteProductsUiState,
+    onProductClick: (Int) -> Unit,
+    onBackToProducts: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -71,51 +82,20 @@ fun FavoriteProductsContent(uiState: FavoriteProductsUiState) {
             )
         }
     ) { contentPadding ->
-        when {
-            uiState.isLoading -> {
-                Column(
-                    modifier = Modifier
-                        .padding(contentPadding)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            uiState.error != null -> {
-
-                Column(
-                    modifier = Modifier
-                        .padding(contentPadding)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        uiState.error,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-            }
-
-            uiState.data != null -> {
-                FavoriteProductsSuccess(
-                    products = uiState.data,
-                    modifier = Modifier.padding(contentPadding)
-                )
-            }
-        }
+        FavoriteProductsList(
+            products = uiState.data,
+            onBackToProducts = onBackToProducts,
+            onProductClick = onProductClick,
+            modifier = Modifier.padding(contentPadding)
+        )
     }
 }
 
 @Composable
-fun FavoriteProductsSuccess(
+fun FavoriteProductsList(
     products: List<FavoriteProduct>,
+    onBackToProducts: () -> Unit,
+    onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (products.isEmpty()) {
@@ -133,7 +113,7 @@ fun FavoriteProductsSuccess(
                 color = MaterialTheme.colorScheme.primary
             )
             TextButton(
-                onClick = {}
+                onClick = {onBackToProducts()}
             ) {
                 Text(
                     text = "Browse products",
@@ -148,18 +128,22 @@ fun FavoriteProductsSuccess(
             modifier = modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(dummyProducts) { product ->
-                FavoriteProductCard(product)
+            items(products) { product ->
+                FavoriteProductCard(onProductClick, product)
             }
         }
     }
 }
 
 @Composable
-fun FavoriteProductCard(product: FavoriteProduct) {
+fun FavoriteProductCard(
+    onProductClick: (Int) -> Unit,
+    product: FavoriteProduct
+) {
     Card(
+        onClick = { onProductClick(product.id) },
         modifier = Modifier
-            .height(100.dp)
+            .height(150.dp)
             .fillMaxWidth()
     ) {
         Row(
@@ -182,8 +166,8 @@ fun FavoriteProductCard(product: FavoriteProduct) {
                 modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = product.title, fontWeight = FontWeight.Bold)
-                Text(text = "€${product.price}", fontWeight = FontWeight.Bold)
+                Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "€${product.price}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
@@ -213,23 +197,19 @@ val dummyEmptyFavorites = emptyList<FavoriteProduct>()
 @Preview
 @Composable
 fun PreviewFavoriteProductsContent() {
-    FavoriteProductsContent(uiState = FavoriteProductsUiState(data = dummyProducts))
+    FavoriteProductsContent(
+        uiState = FavoriteProductsUiState(data = dummyProducts),
+        onBackToProducts = {},
+        onProductClick = {}
+    )
 }
 
 @Preview
 @Composable
 fun PreviewFavoriteProductsEmpty() {
-    FavoriteProductsContent(uiState = FavoriteProductsUiState(data = dummyEmptyFavorites))
-}
-
-@Preview
-@Composable
-fun PreviewFavoriteProductsLoading() {
-    FavoriteProductsContent(uiState = FavoriteProductsUiState(isLoading = true))
-}
-
-@Preview
-@Composable
-fun PreviewFavoriteProductsError() {
-    FavoriteProductsContent(uiState = FavoriteProductsUiState(error = "An Error Occurred"))
+    FavoriteProductsContent(
+        uiState = FavoriteProductsUiState(data = dummyEmptyFavorites),
+        onBackToProducts = {},
+        onProductClick = {}
+    )
 }

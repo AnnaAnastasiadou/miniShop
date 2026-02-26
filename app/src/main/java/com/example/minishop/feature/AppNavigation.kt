@@ -97,6 +97,7 @@ fun TabsNavHost(
     navController: NavHostController,
     startDestination: TabRoutes,
     onProductClick: (Int) -> Unit,
+    onBackToProducts: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -108,7 +109,7 @@ fun TabsNavHost(
             HomeScreen(onProductClick = onProductClick)
         }
         composable(TabRoutes.FAVORITES.route) {
-            FavoriteProductsScreen()
+            FavoriteProductsScreen(onBackToProducts = onBackToProducts, onProductClick = onProductClick)
         }
         composable(TabRoutes.CART.route) {
             CartScreen()
@@ -161,6 +162,15 @@ fun MainScreen(
             navController,
             startDestination,
             onProductClick,
+            onBackToProducts = {
+                navController.navigate(route = TabRoutes.HOME.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             modifier.padding(contentPadding)
         )
     }
