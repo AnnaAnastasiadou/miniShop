@@ -27,10 +27,8 @@ class FavoritesRepositoryImpl @Inject constructor(private val datasource: Favori
         }
     }
 
-    override suspend fun favoriteProducts(): StateFlow<List<FavoriteProduct>> {
-        return withContext(Dispatchers.IO) {
-            datasource.favorites
-        }
+    override fun favoriteProducts(): StateFlow<List<FavoriteProduct>> {
+            return datasource.favorites
     }
 
     override suspend fun isFavorite(productId: Int): Boolean {

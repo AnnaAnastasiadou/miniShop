@@ -7,7 +7,7 @@ interface FavoritesRepository {
     suspend fun addFavorite(product: FavoriteProduct)
     suspend fun removeFavorite(productId: Int)
     suspend fun loadFavorites(): List<FavoriteProduct>
-    suspend fun favoriteProducts() : StateFlow<List<FavoriteProduct>>
+    fun favoriteProducts() : StateFlow<List<FavoriteProduct>>
 
     suspend fun isFavorite(productId: Int): Boolean
 }
