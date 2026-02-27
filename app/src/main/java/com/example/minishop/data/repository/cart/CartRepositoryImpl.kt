@@ -4,8 +4,8 @@ import com.example.minishop.data.local.datasource.CartDatasource
 import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.cart.CartApi
-import com.example.minishop.data.remote.cart.CartProductDto
-import com.example.minishop.data.remote.cart.CheckoutDto
+import com.example.minishop.data.remote.cart.CheckoutProductDto
+import com.example.minishop.data.remote.cart.CartCheckoutDto
 import com.example.minishop.data.remote.cart.CheckoutResponseDto
 import com.example.minishop.data.repository.safeCall
 import kotlinx.coroutines.Dispatchers
@@ -61,11 +61,11 @@ class CartRepositoryImpl @Inject constructor(
 
 
     override suspend fun checkout(
-        date: String, products: List<CartProductLocal>
+        date: String, products: List<CartProduct>
     ): NetworkResult<CheckoutResponseDto> = safeCall({
         cartApi.checkout(
-            request = CheckoutDto(
-                date, products.map { item -> CartProductDto(item.id, item.quantity) })
+            request = CartCheckoutDto(
+                date, products.map { item -> CheckoutProductDto(item.id, item.quantity) })
         )
     })
 }

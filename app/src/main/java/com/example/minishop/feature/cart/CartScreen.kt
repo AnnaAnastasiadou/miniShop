@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,7 +71,7 @@ fun CartScreen(
             )
         )
     }
-    val onCheckout: () -> Unit = {}
+    val onCheckout: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCheckout) }
     CartScreenContent(uiState, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout)
 }
 
@@ -151,6 +152,33 @@ fun CartScreenContent(
             }
         }
     }
+    CheckoutDialog(uiState.checkoutUiState)
+}
+
+@Composable
+fun CheckoutDialog(
+    checkoutUiState: CheckoutUiState
+) {
+    checkoutUiState.success?.let { successDate ->
+        val checkoutData = checkoutUiState.success
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Order placed successfully!") },
+            text = {
+                Column {
+                    Text("Order ID: ${checkoutData.id}")
+                    Text("Date: ${checkoutData.date}")
+                    Text("Items: ${checkoutData.products.size}")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {}) {
+                    Text("Continue Shopping")
+                }
+            }
+        )
+    }
+    checkoutUiState.error?.let {}
 }
 
 @Composable

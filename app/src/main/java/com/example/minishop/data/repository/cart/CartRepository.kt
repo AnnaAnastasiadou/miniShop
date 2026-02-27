@@ -16,6 +16,6 @@ interface CartRepository {
     suspend fun clearCart()
     suspend fun checkout(
         date: String,
-        products: List<CartProductLocal>
+        products: List<CartProduct>
     ): NetworkResult<CheckoutResponseDto>
 }

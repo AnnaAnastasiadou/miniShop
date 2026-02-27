@@ -1,7 +1,7 @@
 package com.example.minishop.data.remote.cart
 
 
-data class CheckoutDto(
+data class CartCheckoutDto(
     val date: String,
-    val products: List<CartProductDto>
+    val products: List<CheckoutProductDto>
 )

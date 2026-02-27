@@ -7,6 +7,6 @@ import retrofit2.http.POST
 interface CartApi {
     @POST("products/")
     suspend fun checkout(
-        @Body request: CheckoutDto
+        @Body request: CartCheckoutDto
     ) : Response<CheckoutResponseDto>
 }

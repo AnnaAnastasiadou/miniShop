@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.mapper.toCartProduct
+import com.example.minishop.data.mapper.toCheckoutProduct
+import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.repository.cart.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,16 +37,6 @@ class CartViewModel @Inject constructor(
         }
     }
 
-//    val uiState = cartRepository.cartProducts()
-//        .onStart { cartRepository.getCartProducts() }
-//        .map { products -> CartProductsUiState(data = products.map { productLocal -> productLocal.toCartProduct() }) }
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000L),
-//            initialValue = CartProductsUiState()
-//        )
-
-
     fun onEvent(event: CartScreenUiEvent) {
         when (event) {
             is CartScreenUiEvent.OnRemoveFromCart -> onRemoveFromCart(event.productId)
@@ -55,6 +47,8 @@ class CartViewModel @Inject constructor(
             is CartScreenUiEvent.OnIncreaseQuantity -> onIncreaseQuantity(
                 event.productId, event.quantity
             )
+
+            CartScreenUiEvent.OnCheckout -> onCheckout()
         }
     }
 
@@ -78,6 +72,32 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun checkout() {}
+    fun onCheckout() {
+        viewModelScope.launch {
+            val response =
+                cartRepository.checkout(date = getDateNow(), products = _uiState.value.data)
+
+            _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = true)) }
+            when (response) {
+                is NetworkResult.Error -> {
+                    _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(error = "Error while checking out")) }
+                }
+
+                is NetworkResult.Success -> {
+                    val checkoutData = response.data
+                    _uiState.update {
+                        it.copy(
+                            checkoutUiState = it.checkoutUiState.copy(
+                            success = CartCheckout(
+                            id = checkoutData.id,
+                            date = checkoutData.date,
+                            products = checkoutData.products.map { product -> product.toCheckoutProduct() }
+                        )))
+                    }
+                    cartRepository.clearCart()
+                }
+            }
+        }
+    }
 
 }
