@@ -20,7 +20,7 @@ class CartDatasourceImpl @Inject constructor(val dbHelper: MySqliteOpenHelper) :
             put(Tables.Cart.COLUMN_QUANTITY, 1)
             put(Tables.Cart.COLUMN_TITLE, cartProduct.title)
             put(Tables.Cart.COLUMN_PRICE, cartProduct.price)
-            put(Tables.Cart.COLUMN_IMAGE_PATH, cartProduct.price)
+            put(Tables.Cart.COLUMN_IMAGE_PATH, cartProduct.imagePath)
         }
 
         db.insert(Tables.Cart.TABLE_NAME, null, values)
