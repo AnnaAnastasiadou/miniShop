@@ -72,7 +72,9 @@ class CartViewModel @Inject constructor(
 
     fun onDecreaseQuantity(productId: Int, quantity: Int) {
         viewModelScope.launch {
-            cartRepository.decreaseQuantity(productId, quantity)
+            if (quantity > 1) {
+                cartRepository.decreaseQuantity(productId, quantity)
+            }
         }
     }
 

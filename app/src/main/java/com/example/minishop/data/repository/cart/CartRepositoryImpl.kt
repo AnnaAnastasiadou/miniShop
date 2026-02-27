@@ -65,6 +65,7 @@ class CartRepositoryImpl @Inject constructor(
     ): NetworkResult<CheckoutResponseDto> = safeCall({
         cartApi.checkout(
             request = CheckoutDto(
-            date, products.map { item -> CartProductDto(item.id, item.quantity!!) }))
+                date, products.map { item -> CartProductDto(item.id, item.quantity) })
+        )
     })
 }

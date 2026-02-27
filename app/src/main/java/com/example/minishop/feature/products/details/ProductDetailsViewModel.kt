@@ -64,8 +64,16 @@ class ProductDetailsViewModel @Inject constructor(
         when (event) {
             is DetailsScreenUiEvent.OnToggleFavorite -> toggleFavorite()
             DetailsScreenUiEvent.OnAddToCart -> addToCart()
-            is DetailsScreenUiEvent.OnDecreaseQuantity -> onDecreaseQuantity(event.productId, event.quantity)
-            is DetailsScreenUiEvent.OnIncreaseQuantity -> onIncreaseQuantity(event.productId, event.quantity)
+            is DetailsScreenUiEvent.OnDecreaseQuantity -> onDecreaseQuantity(
+                event.productId,
+                event.quantity
+            )
+
+            is DetailsScreenUiEvent.OnIncreaseQuantity -> onIncreaseQuantity(
+                event.productId,
+                event.quantity
+            )
+
             is DetailsScreenUiEvent.OnRemoveFromCart -> onRemoveFromCart(event.productId)
         }
     }
@@ -122,6 +130,7 @@ class ProductDetailsViewModel @Inject constructor(
             _uiState.update { it.copy(data = it.data!!.copy(inCart = 0)) }
         }
     }
+
     fun onIncreaseQuantity(productId: Int, quantity: Int) {
         viewModelScope.launch {
             cartRepository.increaseQuantity(productId, quantity)
@@ -131,8 +140,10 @@ class ProductDetailsViewModel @Inject constructor(
 
     fun onDecreaseQuantity(productId: Int, quantity: Int) {
         viewModelScope.launch {
-            cartRepository.decreaseQuantity(productId, quantity)
-            _uiState.update { it.copy(data = it.data!!.copy(inCart = quantity - 1)) }
+            if (quantity > 1) {
+                cartRepository.decreaseQuantity(productId, quantity)
+                _uiState.update { it.copy(data = it.data!!.copy(inCart = quantity - 1)) }
+            }
         }
     }
 

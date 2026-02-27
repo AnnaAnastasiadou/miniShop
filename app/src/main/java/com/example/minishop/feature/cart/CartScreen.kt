@@ -48,7 +48,6 @@ import com.example.minishop.feature.products.QuantitySelector
 fun CartScreen(
     viewModel: CartViewModel = hiltViewModel()
 ) {
-//    val uiState = CartProductsUiState(data = dummyCartProducts)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onRemoveItem: (Int) -> Unit = { productId ->
         viewModel.onEvent(
