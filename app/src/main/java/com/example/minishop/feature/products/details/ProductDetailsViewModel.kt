@@ -117,7 +117,7 @@ class ProductDetailsViewModel @Inject constructor(
                     title = product.title,
                     price = product.price.toDouble(),
                     imagePath = product.imagePath,
-                    quantity = product.inCart
+                    quantity = 1
                 )
             )
             _uiState.update { it.copy(data = product.copy(inCart = 1)) }
