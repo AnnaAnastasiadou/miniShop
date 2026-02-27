@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,8 +31,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.data.local.model.CartProductLocal
@@ -39,8 +45,11 @@ import com.example.minishop.feature.priceFormatter
 import com.example.minishop.feature.products.QuantitySelector
 
 @Composable
-fun CartScreen() {
-    val uiState = CartProductsUiState(data = dummyCartProducts)
+fun CartScreen(
+    viewModel: CartViewModel = hiltViewModel()
+) {
+//    val uiState = CartProductsUiState(data = dummyCartProducts)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onRemoveItem: (Int) -> Unit = {}
     val onIncreaseItem: (Int, Int) -> Unit = { i1, i2 -> }
     val onDecreaseItem: (Int, Int) -> Unit = { i1, i2 -> }
@@ -82,12 +91,29 @@ fun CartScreenContent(
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(uiState.data) { product ->
-                    CartProductCard(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
+            if (uiState.data.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(uiState.data) { product ->
+                        CartProductCard(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Nothing in your cart yet", fontSize = 16.sp)
                 }
             }
-            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Card(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,7 +121,7 @@ fun CartScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Total")
-                    Text("€${uiState.totalPrice}", fontWeight = FontWeight.Bold)
+                    Text("€${priceFormatter(uiState.totalPrice)}", fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onCheckout,
@@ -132,21 +158,24 @@ fun CartProductCard(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxHeight()
+                    .weight(0.7f)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White),
+                    .background(Color.White)
             )
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(8.dp).weight(1.5f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
                     modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.Bottom,
+                    verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
                         product.title,
-                        modifier = Modifier.weight(2f)
+                        modifier = Modifier.weight(2f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         "€${priceFormatter(product.totalPrice)}",
@@ -207,7 +236,7 @@ val dummyCartProducts = listOf(
         imagePath = "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png",
         quantity = 1,
         totalPrice = 22.30
-    ) , CartProduct(
+    ), CartProduct(
         id = 1,
         title = "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
         price = 109.95,
@@ -229,6 +258,18 @@ val dummyCartProducts = listOf(
 fun PreviewCartScreen() {
     CartScreenContent(
         CartProductsUiState(data = dummyCartProducts),
+        onRemoveItem = {},
+        onIncreaseItem = { i1, i2 -> },
+        onDecreaseItem = { i1, i2 -> },
+        onCheckout = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewEmptyCart() {
+    CartScreenContent(
+        CartProductsUiState(data = emptyList()),
         onRemoveItem = {},
         onIncreaseItem = { i1, i2 -> },
         onDecreaseItem = { i1, i2 -> },

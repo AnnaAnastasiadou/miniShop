@@ -11,7 +11,7 @@ interface CartRepository {
     suspend fun getQuantityById(productId: Int): Int
     suspend fun increaseQuantity(productId: Int, quantity: Int)
     suspend fun decreaseQuantity(productId: Int, quantity: Int)
-    suspend fun getCartProducts()
+    suspend fun getCartProducts(): List<CartProductLocal>
     fun cartProducts(): StateFlow<List<CartProductLocal>>
     suspend fun clearCart()
     suspend fun checkout(

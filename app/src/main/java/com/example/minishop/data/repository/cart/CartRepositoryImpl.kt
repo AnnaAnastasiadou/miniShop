@@ -14,8 +14,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CartRepositoryImpl @Inject constructor(
-    private val cartApi: CartApi,
-    private val cartDatasource: CartDatasource
+    private val cartApi: CartApi, private val cartDatasource: CartDatasource
 ) : CartRepository {
     override suspend fun addItem(cartProduct: CartProductLocal) {
         withContext(Dispatchers.IO) {
@@ -46,10 +45,8 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCartProducts() {
-        withContext(Dispatchers.IO) {
-            cartDatasource.getCartItems()
-        }
+    override suspend fun getCartProducts(): List<CartProductLocal> = withContext(Dispatchers.IO) {
+        cartDatasource.getCartItems()
     }
 
     override fun cartProducts(): StateFlow<List<CartProductLocal>> {
@@ -64,15 +61,10 @@ class CartRepositoryImpl @Inject constructor(
 
 
     override suspend fun checkout(
-        date: String,
-        products: List<CartProductLocal>
-    ): NetworkResult<CheckoutResponseDto> =
-        safeCall({
-            cartApi.checkout(
-                request = CheckoutDto(
-                    date,
-                    products.map { item -> CartProductDto(item.id, item.quantity!!) }
-                )
-            )
-        })
+        date: String, products: List<CartProductLocal>
+    ): NetworkResult<CheckoutResponseDto> = safeCall({
+        cartApi.checkout(
+            request = CheckoutDto(
+            date, products.map { item -> CartProductDto(item.id, item.quantity!!) }))
+    })
 }
