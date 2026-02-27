@@ -63,10 +63,10 @@ class ProductDetailsViewModel @Inject constructor(
     fun onEvent(event: DetailsScreenUiEvent) {
         when (event) {
             is DetailsScreenUiEvent.OnToggleFavorite -> toggleFavorite()
-            is DetailsScreenUiEvent.OnAddToCart -> addToCart()
-            is DetailsScreenUiEvent.OnRemoveFromCart -> onRemoveFromCart(event.productId)
+            DetailsScreenUiEvent.OnAddToCart -> addToCart()
             is DetailsScreenUiEvent.OnDecreaseQuantity -> onDecreaseQuantity(event.productId, event.quantity)
             is DetailsScreenUiEvent.OnIncreaseQuantity -> onIncreaseQuantity(event.productId, event.quantity)
+            is DetailsScreenUiEvent.OnRemoveFromCart -> onRemoveFromCart(event.productId)
         }
     }
 

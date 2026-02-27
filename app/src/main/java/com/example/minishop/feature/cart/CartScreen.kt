@@ -50,9 +50,27 @@ fun CartScreen(
 ) {
 //    val uiState = CartProductsUiState(data = dummyCartProducts)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val onRemoveItem: (Int) -> Unit = {}
-    val onIncreaseItem: (Int, Int) -> Unit = { i1, i2 -> }
-    val onDecreaseItem: (Int, Int) -> Unit = { i1, i2 -> }
+    val onRemoveItem: (Int) -> Unit = { productId ->
+        viewModel.onEvent(
+            CartScreenUiEvent.OnRemoveFromCart(
+                productId
+            )
+        )
+    }
+    val onIncreaseItem: (Int, Int) -> Unit = { productId, quantity ->
+        viewModel.onEvent(
+            CartScreenUiEvent.OnIncreaseQuantity(
+                productId, quantity
+            )
+        )
+    }
+    val onDecreaseItem: (Int, Int) -> Unit = { productId, quantity ->
+        viewModel.onEvent(
+            CartScreenUiEvent.OnDecreaseQuantity(
+                productId, quantity
+            )
+        )
+    }
     val onCheckout: () -> Unit = {}
     CartScreenContent(uiState, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout)
 }
@@ -77,14 +95,12 @@ fun CartScreenContent(
                         Icon(painter = painterResource(R.drawable.ic_shopping_cart), null)
                         Text("Cart", fontWeight = FontWeight.Bold)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+                }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
-    ) {
+        }) {
         Column(
             modifier = Modifier
                 .padding(it)
@@ -93,8 +109,7 @@ fun CartScreenContent(
         ) {
             if (uiState.data.isNotEmpty()) {
                 LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(uiState.data) { product ->
                         CartProductCard(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
@@ -111,9 +126,11 @@ fun CartScreenContent(
                     Text("Nothing in your cart yet", fontSize = 16.sp)
                 }
             }
-            Card(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -163,7 +180,9 @@ fun CartProductCard(
                     .background(Color.White)
             )
             Column(
-                modifier = Modifier.padding(8.dp).weight(1.5f),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1.5f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
@@ -190,8 +209,7 @@ fun CartProductCard(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                     ) {
                         QuantitySelector(
                             product = product,
@@ -261,8 +279,7 @@ fun PreviewCartScreen() {
         onRemoveItem = {},
         onIncreaseItem = { i1, i2 -> },
         onDecreaseItem = { i1, i2 -> },
-        onCheckout = {}
-    )
+        onCheckout = {})
 }
 
 @Preview(showBackground = true)
@@ -273,6 +290,5 @@ fun PreviewEmptyCart() {
         onRemoveItem = {},
         onIncreaseItem = { i1, i2 -> },
         onDecreaseItem = { i1, i2 -> },
-        onCheckout = {}
-    )
+        onCheckout = {})
 }
