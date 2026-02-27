@@ -1,7 +1,7 @@
 package com.example.minishop.data.repository.cart
 
 import com.example.minishop.data.local.datasource.CartDatasource
-import com.example.minishop.data.local.model.CartProduct
+import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.cart.CartApi
 import com.example.minishop.data.remote.cart.CartProductDto
@@ -17,7 +17,7 @@ class CartRepositoryImpl @Inject constructor(
     private val cartApi: CartApi,
     private val cartDatasource: CartDatasource
 ) : CartRepository {
-    override suspend fun addItem(cartProduct: CartProduct) {
+    override suspend fun addItem(cartProduct: CartProductLocal) {
         withContext(Dispatchers.IO) {
             cartDatasource.addItem(cartProduct)
         }
@@ -52,7 +52,7 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun cartProducts(): StateFlow<List<CartProduct>> {
+    override fun cartProducts(): StateFlow<List<CartProductLocal>> {
         return cartDatasource.cartProducts
     }
 
@@ -65,7 +65,7 @@ class CartRepositoryImpl @Inject constructor(
 
     override suspend fun checkout(
         date: String,
-        products: List<CartProduct>
+        products: List<CartProductLocal>
     ): NetworkResult<CheckoutResponseDto> =
         safeCall({
             cartApi.checkout(

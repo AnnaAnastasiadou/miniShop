@@ -45,6 +45,7 @@ import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.feature.Product
+import com.example.minishop.feature.priceFormatter
 
 @Composable
 fun FavoriteProductsScreen(
@@ -167,7 +168,7 @@ fun FavoriteProductCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = "€${product.price}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "€${priceFormatter(product.price)}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }

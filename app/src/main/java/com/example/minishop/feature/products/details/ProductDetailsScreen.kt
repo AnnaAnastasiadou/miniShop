@@ -1,25 +1,20 @@
 package com.example.minishop.feature.products.details
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,7 +36,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +44,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.feature.Product
+import com.example.minishop.feature.products.QuantitySelector
+import com.example.minishop.feature.toCartProduct
 import kotlin.text.replaceFirstChar
 
 @Composable
@@ -239,64 +234,12 @@ fun ProductDetailsSuccess(
                 }
             } else {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    QuantitySelector(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
+                    QuantitySelector(product.toCartProduct(), onRemoveItem, onIncreaseItem, onDecreaseItem, Modifier.height(48.dp))
                 }
             }
         }
     }
 }
-
-
-@Composable
-fun QuantitySelector(
-    product: Product, onRemoveItem: (Int) -> Unit, onIncreaseItem: (Int, Int) -> Unit, onDecreaseItem: (Int, Int) -> Unit
-) {
-
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            Modifier
-                .wrapContentWidth()
-                .height(48.dp)
-                .border(
-                    1.dp, MaterialTheme.colorScheme.outline, RectangleShape
-                ), verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {onDecreaseItem(product.id, product.inCart)},
-                modifier = Modifier.size(48.dp),
-
-                ) { Icon(painterResource(R.drawable.ic_minus), "Reduce item") }
-            VerticalDivider(
-                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
-            )
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    product.inCart.toString(), style = MaterialTheme.typography.titleMedium
-                )
-            }
-            VerticalDivider(
-                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
-            )
-            IconButton(
-                onClick = {onIncreaseItem(product.id, product.inCart)},
-                modifier = Modifier.size(48.dp),
-            ) { Icon(painterResource(R.drawable.ic_plus), "Increase item") }
-        }
-        Button(
-            onClick = { onRemoveItem(product.id) },
-            shape = RectangleShape,
-            modifier = Modifier.height(48.dp)
-        ) {
-            Text("Remove", style = MaterialTheme.typography.labelLarge)
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable

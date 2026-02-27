@@ -3,14 +3,12 @@ package com.example.minishop.feature.products.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.minishop.data.local.model.CartProduct
+import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.mapper.toProduct
-import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.repository.cart.CartRepository
 import com.example.minishop.data.repository.favorites.FavoritesRepository
 import com.example.minishop.data.repository.products.ProductsRepository
-import com.example.minishop.feature.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -106,11 +104,12 @@ class ProductDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val product = _uiState.value.data ?: return@launch
             cartRepository.addItem(
-                CartProduct(
+                CartProductLocal(
                     id = product.id,
                     title = product.title,
                     price = product.price.toDouble(),
                     imagePath = product.imagePath,
+                    quantity = product.inCart
                 )
             )
             _uiState.update { it.copy(data = product.copy(inCart = 1)) }
