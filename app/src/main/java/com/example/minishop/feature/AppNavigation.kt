@@ -116,7 +116,7 @@ fun TabsNavHost(
             )
         }
         composable(TabRoutes.CART.route) {
-            CartScreen(onContinueShopping = onContinueShopping)
+            CartScreen(onContinueShopping = onContinueShopping, onProductClick = onProductClick)
         }
         composable(TabRoutes.PROFILE.route) {
             ProfileScreen()

@@ -51,7 +51,8 @@ import com.example.minishop.feature.products.QuantitySelector
 @Composable
 fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
-    onContinueShopping: () -> Unit
+    onContinueShopping: () -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onRemoveItem: (Int) -> Unit = { productId ->
@@ -78,13 +79,14 @@ fun CartScreen(
     val onCheckout: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCheckout) }
 
     val onBackToCart: () -> Unit = {viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog)}
-    CartScreenContent(uiState, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout, onContinueShopping, onBackToCart)
+    CartScreenContent(uiState, onProductClick, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout, onContinueShopping, onBackToCart)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreenContent(
     uiState: CartProductsUiState,
+    onProductClick: (Int) -> Unit,
     onRemoveItem: (Int) -> Unit,
     onIncreaseItem: (Int, Int) -> Unit,
     onDecreaseItem: (Int, Int) -> Unit,
@@ -120,7 +122,9 @@ fun CartScreenContent(
                     modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(uiState.data) { product ->
-                        CartProductCard(product, onRemoveItem, onIncreaseItem, onDecreaseItem)
+                        CartProductCard(
+                            product, onRemoveItem, onIncreaseItem, onDecreaseItem, onProductClick
+                        )
                     }
                 }
             } else {
@@ -230,11 +234,13 @@ fun CartProductCard(
     onRemoveItem: (Int) -> Unit,
     onIncreaseItem: (Int, Int) -> Unit,
     onDecreaseItem: (Int, Int) -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(150.dp),
+        onClick = { onProductClick(product.id) }
     ) {
         Row(modifier = Modifier.padding(8.dp)) {
             AsyncImage(
@@ -351,7 +357,8 @@ fun PreviewCartScreen() {
         onDecreaseItem = { i1, i2 -> },
         onCheckout = {},
         onContinueShopping = {},
-        onBackToCart = {}
+        onBackToCart = {},
+        onProductClick = {}
     )
 }
 
@@ -365,7 +372,8 @@ fun PreviewEmptyCart() {
         onDecreaseItem = { i1, i2 -> },
         onCheckout = {},
         onContinueShopping = {},
-        onBackToCart = {}
+        onBackToCart = {},
+        onProductClick = {}
     )
 }
 
