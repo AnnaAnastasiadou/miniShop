@@ -150,7 +150,7 @@ fun HomeScreenContent(
 fun Categories(
     categoriesUiState: CategoriesUiState, onCategoryClick: (String) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("all") }
+    var selectedCategory by remember { mutableStateOf(categoriesUiState.selectedCategory) }
     when {
         categoriesUiState.error != null -> {
             Row(

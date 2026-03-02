@@ -16,6 +16,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -28,12 +30,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.minishop.R
+import com.example.minishop.ShopRootViewModel
 import com.example.minishop.feature.cart.CartScreen
 import com.example.minishop.feature.login.LogInScreen
 import com.example.minishop.feature.products.details.ProductDetailsScreen
 import com.example.minishop.feature.products.favorites.FavoriteProductsScreen
 import com.example.minishop.feature.products.home.HomeScreen
 import com.example.minishop.feature.profile.ProfileScreen
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 sealed class RootRoute(
     val route: String
@@ -49,16 +53,18 @@ enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
     HOME("home", "Home", R.drawable.ic_home),
     FAVORITES("favorites", "Favorites", R.drawable.ic_heart),
     CART("cart", "Cart", R.drawable.ic_shopping_cart),
-    PROFILE("profile", "Profile", R.drawable.ic_profile_image)
+    PROFILE("profile", "Profile", R.drawable.ic_avatar)
 }
+
 
 @Composable
 fun ShopRootNavHost(
-    isLoggedIn: Boolean,
+    viewModel: ShopRootViewModel = hiltViewModel(),
     modifier: Modifier = Modifier.statusBarsPadding()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rootNavController = rememberNavController()
-    val startDestination = if (isLoggedIn) RootRoute.Main.route else RootRoute.LogIn.route
+    val startDestination = if (uiState.isLoggedIn) RootRoute.Main.route else RootRoute.LogIn.route
     NavHost(
         navController = rootNavController, startDestination = startDestination,
         modifier = modifier
