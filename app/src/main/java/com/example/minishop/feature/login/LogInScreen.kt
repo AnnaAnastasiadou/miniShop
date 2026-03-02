@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -108,17 +109,21 @@ fun LogInContent(
                 )
             }
 
-            Button(
-                onClick = { onClick(usernameText, passwordText) },
-                shape = RectangleShape,
-                enabled = !uiState.isLoading
-            ) {
-                Text(
-                    text = "LOGIN",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(4.dp)
-                )
+            if (!uiState.isLoading) {
+                Button(
+                    onClick = { onClick(usernameText, passwordText) },
+                    shape = RectangleShape,
+                    enabled = !(usernameText.isBlank() || passwordText.isBlank())
+                ) {
+                    Text(
+                        text = "LOGIN",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(4.dp)
+                    )
+                }
+            } else {
+                CircularProgressIndicator()
             }
 
 
