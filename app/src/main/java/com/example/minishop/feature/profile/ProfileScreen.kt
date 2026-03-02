@@ -15,10 +15,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.minishop.R
 
 @Composable
-fun ProfileScreen(onLogOut: () -> Unit) {
+fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
+    val onLogOut: () -> Unit = { viewModel.onEvent(ProfileScreenUiEvent.LogOut)}
     ProfileScreenContent(onLogOut)
 }
 

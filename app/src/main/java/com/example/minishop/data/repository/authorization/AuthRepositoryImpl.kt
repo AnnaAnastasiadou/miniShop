@@ -9,6 +9,9 @@ import com.example.minishop.data.remote.authorization.LoginRequestDto
 import com.example.minishop.data.remote.authorization.LoginResponseDto
 import com.example.minishop.data.repository.safeCall
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -17,6 +20,10 @@ class AuthRepositoryImpl @Inject constructor(
     private val sharedPreferencesDatasource: SharedPreferencesDatasource,
     private val tokenProvider: AuthTokenProvider
 ) : AuthRepository {
+
+    private val _isLoggedIn = MutableStateFlow(isLoggedIn())
+    override val isLoggedIn = _isLoggedIn.asStateFlow()
+
     override suspend fun logIn(
         username: String, password: String
     ): NetworkResult<LoginResponseDto> =
@@ -31,6 +38,7 @@ class AuthRepositoryImpl @Inject constructor(
             if (result is NetworkResult.Success) {
                 sharedPreferencesDatasource.saveToken(result.data.token)
                 tokenProvider.setToken(result.data.token)
+                _isLoggedIn.value = true
             }
             result
         }
@@ -39,6 +47,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun logOut() = withContext(Dispatchers.IO) {
         sharedPreferencesDatasource.removeToken()
         tokenProvider.clearToken()
+        _isLoggedIn.value = false
     }
 
     override fun isLoggedIn(): Boolean {
