@@ -75,10 +75,11 @@ class CartViewModel @Inject constructor(
 
     fun onCheckout() {
         viewModelScope.launch {
+            _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = true)) }
+
             val response =
                 cartRepository.checkout(date = getDateNow(), products = _uiState.value.data)
 
-            _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = true)) }
             when (response) {
                 is NetworkResult.Error -> {
                     _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = false, success = null,error = "Error while checking out")) }

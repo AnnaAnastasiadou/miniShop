@@ -28,62 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.example.minishop.R
 import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.repository.cart.CartProduct
-
-//@Composable
-//fun QuantitySelector(
-//    product: CartProductLocal,
-//    onRemoveItem: (Int) -> Unit,
-//    onIncreaseItem: (Int, Int) -> Unit,
-//    onDecreaseItem: (Int, Int) -> Unit,
-//    height: androidx.compose.ui.unit.Dp = 45.dp
-//) {
-//
-//    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-//        Row(
-//            modifier = Modifier
-//                .weight(1f)
-//                .wrapContentWidth()
-//                .border(
-//                    1.dp, MaterialTheme.colorScheme.outline, RectangleShape
-//                ), verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            IconButton(
-//                onClick = { onDecreaseItem(product.id, product.quantity) },
-//                modifier = Modifier.weight(1f).fillMaxHeight(),
-//
-//                ) { Icon(painterResource(R.drawable.ic_minus), "Reduce item") }
-//            VerticalDivider(
-//                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
-//            )
-//            Box(
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .fillMaxHeight()
-//                    .background(MaterialTheme.colorScheme.background),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Text(
-//                    product.quantity.toString(), style = MaterialTheme.typography.titleMedium
-//                )
-//            }
-//            VerticalDivider(
-//                modifier = Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline
-//            )
-//            IconButton(
-//                onClick = { onIncreaseItem(product.id, product.quantity) },
-//                modifier = Modifier.weight(1f).fillMaxHeight(),
-//            ) { Icon(painterResource(R.drawable.ic_plus), "Increase item") }
-//        }
-//        Button(
-//            onClick = { onRemoveItem(product.id) },
-//            shape = RectangleShape,
-//            modifier = Modifier.fillMaxWidth().weight(1f)
-//        ) {
-//            Text("Remove")
-//        }
-//    }
-//}
-
 @Composable
 fun QuantitySelector(
     product: CartProduct,
