@@ -49,7 +49,7 @@ enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
     HOME("home", "Home", R.drawable.ic_home),
     FAVORITES("favorites", "Favorites", R.drawable.ic_heart),
     CART("cart", "Cart", R.drawable.ic_shopping_cart),
-    PROFILE("profile", "Profile", R.drawable.ic_profile_image)
+    PROFILE("profile", "Profile", R.drawable.ic_avatar)
 }
 
 @Composable
