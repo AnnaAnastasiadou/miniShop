@@ -5,7 +5,8 @@ import com.example.minishop.feature.Product
 data class CategoriesUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val data: List<String> ?= null
+    val data: List<String> ?= null,
+    val selectedCategory: String? = "all"
 )
 
 data class ProductsUiState(

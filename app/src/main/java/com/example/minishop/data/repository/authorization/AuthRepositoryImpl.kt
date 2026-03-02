@@ -50,7 +50,7 @@ class AuthRepositoryImpl @Inject constructor(
         _isLoggedIn.value = false
     }
 
-    override fun isLoggedIn(): Boolean {
+     override fun isLoggedIn(): Boolean {
         var token = tokenProvider.getToken()
         if (token == null) {
             sharedPreferencesDatasource.getToken()?.let {

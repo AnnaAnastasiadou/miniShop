@@ -131,11 +131,11 @@ class HomeViewModel @Inject constructor(
             is HomeScreenUiEvent.OnCategorySelected -> {
                 val categoryLower = event.category.lowercase()
                 if (categoryLower == "all") {
-                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts), categoriesUiState = it.categoriesUiState.copy(selectedCategory = "all")) }
                     return
                 }
                 val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
-                _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts)) }
+                _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filteredProducts), categoriesUiState = it.categoriesUiState.copy(selectedCategory = categoryLower)) }
                 currentCategoryProducts = filteredProducts
             }
 

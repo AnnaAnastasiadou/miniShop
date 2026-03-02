@@ -14,18 +14,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var authRepository: AuthRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MiniShopTheme {
-                val isLoggedIn by authRepository.isLoggedIn.collectAsStateWithLifecycle()
-                ShopRootNavHost(isLoggedIn)
-//                val loggedIn = authRepository.isLoggedIn()
-//                ShopRootNavHost(loggedIn)
+                ShopRootNavHost()
             }
         }
     }
