@@ -59,8 +59,8 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onCategoryClick: (String) -> Unit =
         { viewModel.onEvent(HomeScreenUiEvent.OnCategorySelected(category = it)) }
-    val onSearch: (String) -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnSearch(it))}
-    val onClear: () -> Unit = {viewModel.onEvent(HomeScreenUiEvent.OnClear)}
+    val onSearch: (String) -> Unit = { viewModel.onEvent(HomeScreenUiEvent.OnSearch(it)) }
+    val onClear: () -> Unit = { viewModel.onEvent(HomeScreenUiEvent.OnClear) }
     HomeScreenContent(uiState, onCategoryClick, onSearch, onClear, onProductClick)
 }
 
@@ -73,63 +73,61 @@ fun HomeScreenContent(
     onClear: () -> Unit,
     onProductClick: (Int) -> Unit
 ) {
-    var isSearchBarActive by remember {mutableStateOf(false)}
-    var searchQuery by remember {mutableStateOf("")}
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    if (isSearchBarActive) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = {
-                                searchQuery = it
-                                onSearch(searchQuery)
-                            },
-                            singleLine = true,
-                            placeholder = {Text("Search products...")},
-                            modifier = Modifier.fillMaxWidth()
+    var isSearchBarActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    Column() {
+        TopAppBar(
+            title = {
+                if (isSearchBarActive) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            onSearch(searchQuery)
+                        },
+                        singleLine = true,
+                        placeholder = { Text("Search products...") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text("MiniShop", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                }
+            },
+            actions = {
+                if (isSearchBarActive) {
+                    IconButton(
+                        onClick = {
+                            isSearchBarActive = false
+                            onClear()
+                            searchQuery = ""
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Close search",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
-                    } else {
-                        Text("MiniShop", fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     }
-                },
-                actions = {
-                    if (isSearchBarActive) {
-                        IconButton(
-                            onClick = {
-                                isSearchBarActive = false
-                                onClear()
-                                searchQuery = ""
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Close search",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                } else {
+                    IconButton(
+                        onClick = {
+                            isSearchBarActive = true
                         }
-                    } else {
-                        IconButton(
-                            onClick = {
-                                isSearchBarActive = true
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_search),
-                                contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
             )
-        }) {
-        Column(modifier = Modifier.padding(it)) {
+        )
+        Column() {
             val isLoading = uiState.categoriesUiState.isLoading || uiState.productsUiState.isLoading
             if (isLoading) {
                 Row(

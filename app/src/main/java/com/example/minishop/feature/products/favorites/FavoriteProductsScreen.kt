@@ -64,32 +64,30 @@ fun FavoriteProductsContent(
     onProductClick: (Int) -> Unit,
     onBackToProducts: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(painterResource(R.drawable.ic_heart), null)
-                        Text("Favorites")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+    Column {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(painterResource(R.drawable.ic_heart), null)
+                    Text("Favorites")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
             )
-        }
-    ) { contentPadding ->
+        )
+
         FavoriteProductsList(
             products = uiState.data,
             onBackToProducts = onBackToProducts,
             onProductClick = onProductClick,
-            modifier = Modifier.padding(contentPadding)
         )
     }
+
 }
 
 @Composable
@@ -114,7 +112,7 @@ fun FavoriteProductsList(
                 color = MaterialTheme.colorScheme.primary
             )
             TextButton(
-                onClick = {onBackToProducts()}
+                onClick = { onBackToProducts() }
             ) {
                 Text(
                     text = "Browse products",
@@ -168,7 +166,11 @@ fun FavoriteProductCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = "€${priceFormatter(product.price)}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "€${priceFormatter(product.price)}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }
@@ -195,7 +197,7 @@ val dummyProducts = listOf(
 val dummyEmptyFavorites = emptyList<FavoriteProduct>()
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewFavoriteProductsContent() {
     FavoriteProductsContent(
@@ -205,7 +207,7 @@ fun PreviewFavoriteProductsContent() {
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewFavoriteProductsEmpty() {
     FavoriteProductsContent(

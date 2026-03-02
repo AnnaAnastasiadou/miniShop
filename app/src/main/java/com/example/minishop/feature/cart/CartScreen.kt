@@ -157,7 +157,8 @@ fun CartScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(4.dp),
+                    enabled = !(uiState.data.isEmpty())
                 ) {
                     Text("Checkout")
                 }

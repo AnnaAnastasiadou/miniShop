@@ -88,6 +88,7 @@ class CartViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     val checkoutData = response.data
                     if (checkoutData.products.isEmpty()) {
+                        _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = false)) }
                         return@launch
                     }
                     _uiState.update {
