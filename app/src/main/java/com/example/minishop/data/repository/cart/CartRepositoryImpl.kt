@@ -5,7 +5,7 @@ import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.cart.CartApi
 import com.example.minishop.data.remote.cart.CheckoutProductDto
-import com.example.minishop.data.remote.cart.CartCheckoutDto
+import com.example.minishop.data.remote.cart.CheckoutRequestDto
 import com.example.minishop.data.remote.cart.CheckoutResponseDto
 import com.example.minishop.data.repository.safeCall
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +64,7 @@ class CartRepositoryImpl @Inject constructor(
         date: String, products: List<CartProduct>
     ): NetworkResult<CheckoutResponseDto> = safeCall({
         cartApi.checkout(
-            request = CartCheckoutDto(
+            request = CheckoutRequestDto(
                 date, products.map { item -> CheckoutProductDto(item.id, item.quantity) })
         )
     })

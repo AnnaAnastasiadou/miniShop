@@ -98,6 +98,7 @@ fun TabsNavHost(
     startDestination: TabRoutes,
     onProductClick: (Int) -> Unit,
     onBackToProducts: () -> Unit,
+    onContinueShopping: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -109,10 +110,13 @@ fun TabsNavHost(
             HomeScreen(onProductClick = onProductClick)
         }
         composable(TabRoutes.FAVORITES.route) {
-            FavoriteProductsScreen(onBackToProducts = onBackToProducts, onProductClick = onProductClick)
+            FavoriteProductsScreen(
+                onBackToProducts = onBackToProducts,
+                onProductClick = onProductClick
+            )
         }
         composable(TabRoutes.CART.route) {
-            CartScreen()
+            CartScreen(onContinueShopping = onContinueShopping)
         }
         composable(TabRoutes.PROFILE.route) {
             ProfileScreen()
@@ -162,16 +166,21 @@ fun MainScreen(
             navController,
             startDestination,
             onProductClick,
-            onBackToProducts = {
-                navController.navigate(route = TabRoutes.HOME.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            modifier.padding(contentPadding)
+            onBackToProducts = { navigateToHome(navController) },
+            onContinueShopping = { navigateToHome(navController) },
+            modifier = Modifier.padding(contentPadding)
         )
+    }
+}
+
+fun navigateToHome(
+    navController: NavHostController
+) {
+    navController.navigate(route = TabRoutes.HOME.route) {
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }

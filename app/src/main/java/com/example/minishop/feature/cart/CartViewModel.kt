@@ -49,6 +49,7 @@ class CartViewModel @Inject constructor(
             )
 
             CartScreenUiEvent.OnCheckout -> onCheckout()
+            CartScreenUiEvent.OnCloseCheckoutDialog -> closeCheckoutDialog()
         }
     }
 
@@ -80,19 +81,24 @@ class CartViewModel @Inject constructor(
             _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = true)) }
             when (response) {
                 is NetworkResult.Error -> {
-                    _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(error = "Error while checking out")) }
+                    _uiState.update { it.copy(checkoutUiState = it.checkoutUiState.copy(isLoading = false, success = null,error = "Error while checking out")) }
                 }
 
                 is NetworkResult.Success -> {
                     val checkoutData = response.data
+                    if (checkoutData.products.isEmpty()) {
+                        return@launch
+                    }
                     _uiState.update {
                         it.copy(
                             checkoutUiState = it.checkoutUiState.copy(
-                            success = CartCheckout(
-                            id = checkoutData.id,
-                            date = checkoutData.date,
-                            products = checkoutData.products.map { product -> product.toCheckoutProduct() }
-                        )))
+                                isLoading = false,
+                                error = null,
+                                success = CartCheckout(
+                                    id = checkoutData.id,
+                                    date = checkoutData.date,
+                                    products = checkoutData.products.map { product -> product.toCheckoutProduct() }
+                                )))
                     }
                     cartRepository.clearCart()
                 }
@@ -100,4 +106,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
+    fun closeCheckoutDialog() {
+        _uiState.update { it.copy(checkoutUiState = CheckoutUiState()) }
+    }
 }

@@ -2,9 +2,11 @@ package com.example.minishop.feature.cart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +50,8 @@ import com.example.minishop.feature.products.QuantitySelector
 
 @Composable
 fun CartScreen(
-    viewModel: CartViewModel = hiltViewModel()
+    viewModel: CartViewModel = hiltViewModel(),
+    onContinueShopping: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onRemoveItem: (Int) -> Unit = { productId ->
@@ -72,7 +76,9 @@ fun CartScreen(
         )
     }
     val onCheckout: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCheckout) }
-    CartScreenContent(uiState, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout)
+
+    val onBackToCart: () -> Unit = {viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog)}
+    CartScreenContent(uiState, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout, onContinueShopping, onBackToCart)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +88,9 @@ fun CartScreenContent(
     onRemoveItem: (Int) -> Unit,
     onIncreaseItem: (Int, Int) -> Unit,
     onDecreaseItem: (Int, Int) -> Unit,
-    onCheckout: () -> Unit
+    onCheckout: () -> Unit,
+    onContinueShopping: () -> Unit,
+    onBackToCart: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -152,33 +160,68 @@ fun CartScreenContent(
             }
         }
     }
-    CheckoutDialog(uiState.checkoutUiState)
+    CheckoutDialog(
+        uiState.checkoutUiState,
+        onContinueShopping = onContinueShopping,
+        onBackToCart = onBackToCart
+    )
 }
 
 @Composable
 fun CheckoutDialog(
-    checkoutUiState: CheckoutUiState
+    checkoutUiState: CheckoutUiState,
+    onContinueShopping: () -> Unit,
+    onBackToCart: () -> Unit
+
 ) {
-    checkoutUiState.success?.let { successDate ->
-        val checkoutData = checkoutUiState.success
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text("Order placed successfully!") },
-            text = {
-                Column {
-                    Text("Order ID: ${checkoutData.id}")
-                    Text("Date: ${checkoutData.date}")
-                    Text("Items: ${checkoutData.products.size}")
+    when {
+        checkoutUiState.isLoading -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Checking out...") },
+                text = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
+        checkoutUiState.success != null -> {
+            val checkoutData = checkoutUiState.success
+            AlertDialog(
+                onDismissRequest = onBackToCart,
+                title = { Text("Order placed successfully!") },
+                text = {
+                    Column {
+                        Text("Order ID: ${checkoutData.id}")
+                        Text("Date: ${checkoutData.date}")
+                        Text("Items: ${checkoutData.products.size}")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = onContinueShopping) {
+                        Text("Continue Shopping")
+                    }
                 }
-            },
-            confirmButton = {
-                Button(onClick = {}) {
-                    Text("Continue Shopping")
-                }
-            }
-        )
+            )
+        }
+
+        checkoutUiState.error != null -> {
+            AlertDialog(
+                onDismissRequest = onBackToCart,
+                title = { Text("Checkout Failed") },
+                text = { Text(checkoutUiState.error) },
+                confirmButton = {},
+                dismissButton = { Button(onClick = onBackToCart) { Text("Cancel") } }
+            )
+        }
     }
-    checkoutUiState.error?.let {}
+
 }
 
 @Composable
@@ -306,7 +349,10 @@ fun PreviewCartScreen() {
         onRemoveItem = {},
         onIncreaseItem = { i1, i2 -> },
         onDecreaseItem = { i1, i2 -> },
-        onCheckout = {})
+        onCheckout = {},
+        onContinueShopping = {},
+        onBackToCart = {}
+    )
 }
 
 @Preview(showBackground = true)
@@ -317,5 +363,51 @@ fun PreviewEmptyCart() {
         onRemoveItem = {},
         onIncreaseItem = { i1, i2 -> },
         onDecreaseItem = { i1, i2 -> },
-        onCheckout = {})
+        onCheckout = {},
+        onContinueShopping = {},
+        onBackToCart = {}
+    )
+}
+
+@Preview
+@Composable
+fun PreviewCheckoutDialogLoading() {
+    CheckoutDialog(
+        checkoutUiState = CheckoutUiState(isLoading = true),
+        onContinueShopping = {},
+        onBackToCart = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewCheckoutDialogSuccess() {
+    CheckoutDialog(
+        checkoutUiState = CheckoutUiState(
+            success = CartCheckout(
+                id = 1,
+                date = "2020-03-02T00:00:00.000Z",
+                products = listOf(
+                    CheckoutProduct(
+                        id = 1,
+                        quantity = 4
+                    )
+                )
+            )
+        ),
+        onContinueShopping = {},
+        onBackToCart = {}
+    )
+}
+
+@Preview
+@Composable
+fun PreviewCheckoutDialogError() {
+    CheckoutDialog(
+        checkoutUiState = CheckoutUiState(
+            error = "An Unexpected Error Occurred"
+        ),
+        onContinueShopping = {},
+        onBackToCart = {},
+    )
 }
