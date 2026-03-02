@@ -199,7 +199,7 @@ fun CheckoutDialog(
                 text = {
                     Column {
                         Text("Order ID: ${checkoutData.id}")
-                        Text("Date: ${checkoutData.date}")
+                        Text("Date: ${dateFormatter(checkoutData.date)}")
                         Text("Items: ${checkoutData.products.size}")
                     }
                 },
