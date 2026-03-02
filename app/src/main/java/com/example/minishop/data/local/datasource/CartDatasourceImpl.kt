@@ -3,24 +3,24 @@ package com.example.minishop.data.local.datasource
 import android.content.ContentValues
 import com.example.minishop.data.local.database.MySqliteOpenHelper
 import com.example.minishop.data.local.database.Tables
-import com.example.minishop.data.local.model.CartProduct
+import com.example.minishop.data.local.model.CartProductLocal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class CartDatasourceImpl @Inject constructor(val dbHelper: MySqliteOpenHelper) : CartDatasource {
-    private val _cartProducts = MutableStateFlow<List<CartProduct>>(emptyList())
+    private val _cartProducts = MutableStateFlow<List<CartProductLocal>>(emptyList())
     override val cartProducts = _cartProducts.asStateFlow()
 
-    override fun addItem(cartProduct: CartProduct) {
+    override fun addItem(cartProduct: CartProductLocal) {
         val db = dbHelper.writableDatabase
         val values = ContentValues().apply {
             put(Tables.Cart.COLUMN_PRODUCT_ID, cartProduct.id)
             put(Tables.Cart.COLUMN_QUANTITY, 1)
             put(Tables.Cart.COLUMN_TITLE, cartProduct.title)
             put(Tables.Cart.COLUMN_PRICE, cartProduct.price)
-            put(Tables.Cart.COLUMN_IMAGE_PATH, cartProduct.price)
+            put(Tables.Cart.COLUMN_IMAGE_PATH, cartProduct.imagePath)
         }
 
         db.insert(Tables.Cart.TABLE_NAME, null, values)
@@ -86,9 +86,9 @@ class CartDatasourceImpl @Inject constructor(val dbHelper: MySqliteOpenHelper) :
         _cartProducts.value = emptyList()
     }
 
-    override fun getCartItems(): List<CartProduct> {
+    override fun getCartItems(): List<CartProductLocal> {
         val db = dbHelper.readableDatabase
-        val productList = mutableListOf<CartProduct>()
+        val productList = mutableListOf<CartProductLocal>()
 
         val columns = arrayOf(
             Tables.Cart.COLUMN_PRODUCT_ID,
@@ -110,7 +110,7 @@ class CartDatasourceImpl @Inject constructor(val dbHelper: MySqliteOpenHelper) :
 
         cursor.use {
             while (it.moveToNext()) {
-                val cartProduct = CartProduct(
+                val cartProduct = CartProductLocal(
                     id = it.getInt(it.getColumnIndexOrThrow(Tables.Cart.COLUMN_PRODUCT_ID)),
                     quantity = it.getInt(it.getColumnIndexOrThrow(Tables.Cart.COLUMN_QUANTITY)),
                     title = it.getString(it.getColumnIndexOrThrow(Tables.Cart.COLUMN_TITLE)),

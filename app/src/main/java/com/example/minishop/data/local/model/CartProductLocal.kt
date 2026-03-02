@@ -1,8 +1,8 @@
 package com.example.minishop.data.local.model
 
-data class CartProduct(
+data class CartProductLocal(
     val id: Int,
-    val quantity: Int? = null,
+    val quantity: Int,
     val title: String,
     val price: Double,
     val imagePath: String?

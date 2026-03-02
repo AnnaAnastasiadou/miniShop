@@ -1,11 +1,11 @@
 package com.example.minishop.data.repository.cart
 
 import com.example.minishop.data.local.datasource.CartDatasource
-import com.example.minishop.data.local.model.CartProduct
+import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.remote.NetworkResult
 import com.example.minishop.data.remote.cart.CartApi
-import com.example.minishop.data.remote.cart.CartProductDto
-import com.example.minishop.data.remote.cart.CheckoutDto
+import com.example.minishop.data.remote.cart.CheckoutProductDto
+import com.example.minishop.data.remote.cart.CheckoutRequestDto
 import com.example.minishop.data.remote.cart.CheckoutResponseDto
 import com.example.minishop.data.repository.safeCall
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +14,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CartRepositoryImpl @Inject constructor(
-    private val cartApi: CartApi,
-    private val cartDatasource: CartDatasource
+    private val cartApi: CartApi, private val cartDatasource: CartDatasource
 ) : CartRepository {
-    override suspend fun addItem(cartProduct: CartProduct) {
+    override suspend fun addItem(cartProduct: CartProductLocal) {
         withContext(Dispatchers.IO) {
             cartDatasource.addItem(cartProduct)
         }
@@ -46,13 +45,11 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCartProducts() {
-        withContext(Dispatchers.IO) {
-            cartDatasource.getCartItems()
-        }
+    override suspend fun getCartProducts(): List<CartProductLocal> = withContext(Dispatchers.IO) {
+        cartDatasource.getCartItems()
     }
 
-    override fun cartProducts(): StateFlow<List<CartProduct>> {
+    override fun cartProducts(): StateFlow<List<CartProductLocal>> {
         return cartDatasource.cartProducts
     }
 
@@ -64,15 +61,11 @@ class CartRepositoryImpl @Inject constructor(
 
 
     override suspend fun checkout(
-        date: String,
-        products: List<CartProduct>
-    ): NetworkResult<CheckoutResponseDto> =
-        safeCall({
-            cartApi.checkout(
-                request = CheckoutDto(
-                    date,
-                    products.map { item -> CartProductDto(item.id, item.quantity!!) }
-                )
-            )
-        })
+        date: String, products: List<CartProduct>
+    ): NetworkResult<CheckoutResponseDto> = safeCall({
+        cartApi.checkout(
+            request = CheckoutRequestDto(
+                date, products.map { item -> CheckoutProductDto(item.id, item.quantity) })
+        )
+    })
 }
