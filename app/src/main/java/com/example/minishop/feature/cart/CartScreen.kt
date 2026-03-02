@@ -78,8 +78,17 @@ fun CartScreen(
     }
     val onCheckout: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCheckout) }
 
-    val onBackToCart: () -> Unit = {viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog)}
-    CartScreenContent(uiState, onProductClick, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout, onContinueShopping, onBackToCart)
+    val onBackToCart: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog) }
+    CartScreenContent(
+        uiState,
+        onProductClick,
+        onRemoveItem,
+        onIncreaseItem,
+        onDecreaseItem,
+        onCheckout,
+        onContinueShopping,
+        onBackToCart
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,26 +103,23 @@ fun CartScreenContent(
     onContinueShopping: () -> Unit,
     onBackToCart: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(painter = painterResource(R.drawable.ic_shopping_cart), null)
-                        Text("Cart", fontWeight = FontWeight.Bold)
-                    }
-                }, colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+    Column {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(painter = painterResource(R.drawable.ic_shopping_cart), null)
+                    Text("Cart", fontWeight = FontWeight.Bold)
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
             )
-        }) {
+        )
         Column(
             modifier = Modifier
-                .padding(it)
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {

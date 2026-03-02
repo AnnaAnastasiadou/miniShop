@@ -60,14 +60,14 @@ enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
 @Composable
 fun ShopRootNavHost(
     viewModel: ShopRootViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier.statusBarsPadding()
+    modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rootNavController = rememberNavController()
     val startDestination = if (uiState.isLoggedIn) RootRoute.Main.route else RootRoute.LogIn.route
     NavHost(
         navController = rootNavController, startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier.statusBarsPadding()
     ) {
         composable(route = RootRoute.LogIn.route) {
             LogInScreen(

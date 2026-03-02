@@ -124,7 +124,7 @@ fun FavoriteProductsList(
         }
     } else {
         LazyColumn(
-            modifier = modifier.padding(8.dp),
+            modifier = modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(products) { product ->
