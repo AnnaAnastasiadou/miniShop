@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,32 +65,30 @@ fun FavoriteProductsContent(
     onProductClick: (Int) -> Unit,
     onBackToProducts: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(painterResource(R.drawable.ic_heart), null)
-                        Text("Favorites")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+    Column {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(painterResource(R.drawable.ic_heart), null)
+                    Text(stringResource(R.string.favorites))
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
             )
-        }
-    ) { contentPadding ->
+        )
+
         FavoriteProductsList(
             products = uiState.data,
             onBackToProducts = onBackToProducts,
             onProductClick = onProductClick,
-            modifier = Modifier.padding(contentPadding)
         )
     }
+
 }
 
 @Composable
@@ -105,7 +104,7 @@ fun FavoriteProductsList(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("No favorites yet", fontSize = 24.sp)
+            Text(stringResource(R.string.no_favorites), fontSize = 24.sp)
             HorizontalDivider(
                 Modifier
                     .width(80.dp)
@@ -114,10 +113,10 @@ fun FavoriteProductsList(
                 color = MaterialTheme.colorScheme.primary
             )
             TextButton(
-                onClick = {onBackToProducts()}
+                onClick = { onBackToProducts() }
             ) {
                 Text(
-                    text = "Browse products",
+                    text = stringResource(R.string.browse_products),
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 22.sp,
                     textDecoration = TextDecoration.Underline,
@@ -126,7 +125,7 @@ fun FavoriteProductsList(
         }
     } else {
         LazyColumn(
-            modifier = modifier.padding(8.dp),
+            modifier = modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(products) { product ->
@@ -168,7 +167,11 @@ fun FavoriteProductCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = "€${priceFormatter(product.price)}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "€${priceFormatter(product.price)}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }
@@ -195,7 +198,7 @@ val dummyProducts = listOf(
 val dummyEmptyFavorites = emptyList<FavoriteProduct>()
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewFavoriteProductsContent() {
     FavoriteProductsContent(
@@ -205,7 +208,7 @@ fun PreviewFavoriteProductsContent() {
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewFavoriteProductsEmpty() {
     FavoriteProductsContent(

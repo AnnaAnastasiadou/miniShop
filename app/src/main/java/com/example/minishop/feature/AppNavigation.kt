@@ -1,6 +1,5 @@
 package com.example.minishop.feature
 
-import android.R.attr.type
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -11,15 +10,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -29,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.example.minishop.R
 import com.example.minishop.ShopRootViewModel
 import com.example.minishop.feature.cart.CartScreen
@@ -37,63 +34,72 @@ import com.example.minishop.feature.products.details.ProductDetailsScreen
 import com.example.minishop.feature.products.favorites.FavoriteProductsScreen
 import com.example.minishop.feature.products.home.HomeScreen
 import com.example.minishop.feature.profile.ProfileScreen
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.serialization.Serializable
 
-sealed class RootRoute(
-    val route: String
-) {
-    data object Main : RootRoute("main")
-    data object LogIn : RootRoute("log_in")
-    data object Details : RootRoute("details/{productId}") {
-        fun create(productId: Int) = "details/$productId"
-    }
+sealed interface RootDestination {
+    @Serializable
+    data object Main : RootDestination
+
+    @Serializable
+    data object LogIn : RootDestination
+
+    @Serializable
+    data class Details(val productId: Int) : RootDestination
 }
 
-enum class TabRoutes(val route: String, val label: String, val iconRes: Int) {
-    HOME("home", "Home", R.drawable.ic_home),
-    FAVORITES("favorites", "Favorites", R.drawable.ic_heart),
-    CART("cart", "Cart", R.drawable.ic_shopping_cart),
-    PROFILE("profile", "Profile", R.drawable.ic_avatar)
+sealed interface TabsDestination {
+    @Serializable
+    data object Home : TabsDestination
+
+    @Serializable
+    data object Favorites : TabsDestination
+
+    @Serializable
+    data object Cart : TabsDestination
+
+    @Serializable
+    data object Profile : TabsDestination
 }
 
+data class TabSpec(
+    val label: Int,
+    val iconRes: Int,
+    val destination: TabsDestination
+)
+
+
+val tabs = listOf(
+    TabSpec(R.string.home, R.drawable.ic_home, TabsDestination.Home),
+    TabSpec(R.string.favorites, R.drawable.ic_heart, TabsDestination.Favorites),
+    TabSpec(R.string.cart, R.drawable.ic_shopping_cart, TabsDestination.Cart),
+    TabSpec(R.string.profile, R.drawable.ic_avatar, TabsDestination.Profile)
+)
 
 @Composable
 fun ShopRootNavHost(
     viewModel: ShopRootViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier.statusBarsPadding()
+    modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rootNavController = rememberNavController()
-    val startDestination = if (uiState.isLoggedIn) RootRoute.Main.route else RootRoute.LogIn.route
+    val startDestination =
+        if (uiState.isLoggedIn) RootDestination.Main else RootDestination.LogIn
     NavHost(
-        navController = rootNavController, startDestination = startDestination,
-        modifier = modifier
+        navController = rootNavController,
+        startDestination = startDestination,
+        modifier = modifier.statusBarsPadding()
     ) {
-        composable(route = RootRoute.LogIn.route) {
-            LogInScreen(
-                onLogin = {
-                    rootNavController.navigate(RootRoute.Main.route) {
-                        popUpTo(RootRoute.LogIn.route) { inclusive = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                })
+        composable<RootDestination.LogIn> {
+            LogInScreen()
         }
-        composable(route = RootRoute.Main.route) {
-            MainScreen(onProductClick = { rootNavController.navigate(RootRoute.Details.create(it)) })
+        composable<RootDestination.Main> {
+            MainScreen(onProductClick = { productId ->
+                rootNavController.navigate(RootDestination.Details(productId))
+            })
         }
-        composable(
-            route = RootRoute.Details.route,
-            arguments = listOf(
-                navArgument("productId") {
-                    type = NavType.IntType
-                }
-            )
-        ) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getInt("productId")
-            if (productId != null) {
-                ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
-            }
+        composable<RootDestination.Details> { backStackEntry ->
+            val args = backStackEntry.toRoute<RootDestination.Details>()
+            ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
         }
     }
 }
@@ -101,7 +107,7 @@ fun ShopRootNavHost(
 @Composable
 fun TabsNavHost(
     navController: NavHostController,
-    startDestination: TabRoutes,
+    startDestination: TabsDestination,
     onProductClick: (Int) -> Unit,
     onBackToProducts: () -> Unit,
     onContinueShopping: () -> Unit,
@@ -109,22 +115,22 @@ fun TabsNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination.route,
+        startDestination = startDestination,
         modifier = modifier.fillMaxSize()
     ) {
-        composable(TabRoutes.HOME.route) {
+        composable<TabsDestination.Home> {
             HomeScreen(onProductClick = onProductClick)
         }
-        composable(TabRoutes.FAVORITES.route) {
+        composable<TabsDestination.Favorites> {
             FavoriteProductsScreen(
                 onBackToProducts = onBackToProducts,
                 onProductClick = onProductClick
             )
         }
-        composable(TabRoutes.CART.route) {
+        composable<TabsDestination.Cart> {
             CartScreen(onContinueShopping = onContinueShopping, onProductClick = onProductClick)
         }
-        composable(TabRoutes.PROFILE.route) {
+        composable<TabsDestination.Profile> {
             ProfileScreen()
         }
     }
@@ -136,7 +142,7 @@ fun MainScreen(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
-    val startDestination = TabRoutes.HOME
+    val startDestination = TabsDestination.Home
 
     // Observe nav state so the selected tab updates automatically,
     // even when the back button is clicked
@@ -146,11 +152,12 @@ fun MainScreen(
     Scaffold(
         modifier = modifier, bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                TabRoutes.entries.forEachIndexed { index, destination ->
+                tabs.forEach { tab ->
                     NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
+                        // hasRoute(RouteClass) returns true if this NavDestination was created from the given @Serializable route type.
+                        selected = currentDestination?.hierarchy?.any { it.hasRoute(tab.destination::class) } == true,
                         onClick = {
-                            navController.navigate(route = destination.route) {
+                            navController.navigate(route = tab.destination) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -160,8 +167,8 @@ fun MainScreen(
                         },
                         icon = {
                             Icon(
-                                painter = painterResource(destination.iconRes),
-                                contentDescription = null
+                                painter = painterResource(tab.iconRes),
+                                contentDescription = stringResource(tab.label)
                             )
                         })
                 }
@@ -182,7 +189,7 @@ fun MainScreen(
 fun navigateToHome(
     navController: NavHostController
 ) {
-    navController.navigate(route = TabRoutes.HOME.route) {
+    navController.navigate(route = TabsDestination.Home) {
         popUpTo(navController.graph.findStartDestination().id) {
             saveState
         }

@@ -11,5 +11,4 @@ interface AuthRepository {
     suspend fun logIn(username: String, password: String): NetworkResult<LoginResponseDto>
     suspend fun logOut()
     fun isLoggedIn(): Boolean
-
 }

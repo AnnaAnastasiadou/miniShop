@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,8 +79,17 @@ fun CartScreen(
     }
     val onCheckout: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCheckout) }
 
-    val onBackToCart: () -> Unit = {viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog)}
-    CartScreenContent(uiState, onProductClick, onRemoveItem, onIncreaseItem, onDecreaseItem, onCheckout, onContinueShopping, onBackToCart)
+    val onBackToCart: () -> Unit = { viewModel.onEvent(CartScreenUiEvent.OnCloseCheckoutDialog) }
+    CartScreenContent(
+        uiState,
+        onProductClick,
+        onRemoveItem,
+        onIncreaseItem,
+        onDecreaseItem,
+        onCheckout,
+        onContinueShopping,
+        onBackToCart
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,26 +104,23 @@ fun CartScreenContent(
     onContinueShopping: () -> Unit,
     onBackToCart: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(painter = painterResource(R.drawable.ic_shopping_cart), null)
-                        Text("Cart", fontWeight = FontWeight.Bold)
-                    }
-                }, colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+    Column {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(painter = painterResource(R.drawable.ic_shopping_cart), null)
+                    Text(text = stringResource(R.string.cart), fontWeight = FontWeight.Bold)
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
             )
-        }) {
+        )
         Column(
             modifier = Modifier
-                .padding(it)
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -135,7 +142,7 @@ fun CartScreenContent(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Nothing in your cart yet", fontSize = 16.sp)
+                    Text(stringResource(R.string.empty_cart), fontSize = 16.sp)
                 }
             }
             Card(
@@ -149,7 +156,7 @@ fun CartScreenContent(
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Total")
+                    Text(stringResource(R.string.total))
                     Text("€${priceFormatter(uiState.totalPrice)}", fontWeight = FontWeight.Bold)
                 }
                 Button(
@@ -157,9 +164,10 @@ fun CartScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(4.dp),
+                    enabled = !(uiState.data.isEmpty())
                 ) {
-                    Text("Checkout")
+                    Text(stringResource(R.string.checkout))
                 }
             }
         }
@@ -182,7 +190,7 @@ fun CheckoutDialog(
         checkoutUiState.isLoading -> {
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text("Checking out...") },
+                title = { Text(stringResource(R.string.checking_out)) },
                 text = {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -199,17 +207,17 @@ fun CheckoutDialog(
             val checkoutData = checkoutUiState.success
             AlertDialog(
                 onDismissRequest = onBackToCart,
-                title = { Text("Order placed successfully!") },
+                title = { Text(stringResource(R.string.successful_order)) },
                 text = {
                     Column {
-                        Text("Order ID: ${checkoutData.id}")
-                        Text("Date: ${dateFormatter(checkoutData.date)}")
-                        Text("Items: ${checkoutData.products.size}")
+                        Text(stringResource(R.string.order_id, checkoutData.id))
+                        Text(stringResource(R.string.date, dateFormatter(checkoutData.date)))
+                        Text(stringResource(R.string.items, checkoutData.products.size))
                     }
                 },
                 confirmButton = {
                     Button(onClick = onContinueShopping) {
-                        Text("Continue Shopping")
+                        Text(stringResource(R.string.continue_shopping))
                     }
                 }
             )
@@ -218,10 +226,10 @@ fun CheckoutDialog(
         checkoutUiState.error != null -> {
             AlertDialog(
                 onDismissRequest = onBackToCart,
-                title = { Text("Checkout Failed") },
+                title = { Text(stringResource(R.string.checkout_failed)) },
                 text = { Text(checkoutUiState.error) },
                 confirmButton = {},
-                dismissButton = { Button(onClick = onBackToCart) { Text("Cancel") } }
+                dismissButton = { Button(onClick = onBackToCart) { Text(stringResource(R.string.cancel)) } }
             )
         }
     }

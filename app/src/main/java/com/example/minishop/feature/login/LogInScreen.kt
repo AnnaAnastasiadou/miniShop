@@ -1,5 +1,6 @@
 package com.example.minishop.feature.login
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,16 +38,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.minishop.R
+import kotlinx.coroutines.delay
+import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun LogInScreen(
-    viewModel: LogInViewModel = hiltViewModel(), onLogin: () -> Unit
+    viewModel: LogInViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onClick: (String, String) -> Unit =
         { username, password -> viewModel.logIn(username, password) }
     val onErrorShown: () -> Unit = { viewModel.clearError() }
-    LogInContent(uiState, onClick, onLogin, onErrorShown)
+    LogInContent(
+        uiState,
+        onClick,
+        onErrorShown
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +61,6 @@ fun LogInScreen(
 fun LogInContent(
     uiState: LogInUiState,
     onClick: (String, String) -> Unit,
-    onLogin: () -> Unit,
     onErrorShown: () -> Unit
 ) {
     var usernameText by remember { mutableStateOf("") }
@@ -63,7 +71,11 @@ fun LogInContent(
         CenterAlignedTopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "MiniShop", fontWeight = FontWeight.Bold, fontSize = 40.sp)
+                    Text(
+                        text = stringResource(R.string.minishop),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 40.sp
+                    )
                     Icon(
                         painter = painterResource(R.drawable.ic_shopping_cart),
                         contentDescription = null,
@@ -94,47 +106,45 @@ fun LogInContent(
 
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Username", fontSize = 20.sp)
+                Text(text = stringResource(R.string.username), fontSize = 20.sp)
                 OutlinedTextField(
                     value = usernameText,
                     onValueChange = { usernameText = it },
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Password", fontSize = 20.sp)
+                Text(text = stringResource(R.string.password), fontSize = 20.sp)
                 OutlinedTextField(
                     value = passwordText,
                     onValueChange = { passwordText = it },
                 )
             }
 
-            Button(
-                onClick = { onClick(usernameText, passwordText) },
-                shape = RectangleShape,
-                enabled = !uiState.isLoading
-            ) {
-                Text(
-                    text = "LOGIN",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(4.dp)
-                )
+            if (!uiState.isLoading) {
+                Button(
+                    onClick = { onClick(usernameText, passwordText) },
+                    shape = RectangleShape,
+                    enabled = !(usernameText.isBlank() || passwordText.isBlank())
+                ) {
+                    Text(
+                        text = stringResource(R.string.login),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(4.dp)
+                    )
+                }
+            } else {
+                CircularProgressIndicator()
             }
-
-
         }
     }
 
-    LaunchedEffect(uiState.error) {
-        if (!uiState.error.isNullOrBlank()) {
-            snackBarHostState.showSnackbar("Invalid username or password")
+    val loginErrorMessage: String = stringResource(R.string.login_error)
+
+    if (!uiState.error.isNullOrBlank()) {
+        LaunchedEffect(uiState.error) {
+            snackBarHostState.showSnackbar(loginErrorMessage)
             onErrorShown()
-        }
-    }
-
-    LaunchedEffect(uiState.success) {
-        if (uiState.success) {
-            onLogin()
         }
     }
 }
@@ -145,6 +155,5 @@ fun PreviewLoginScreen() {
     LogInContent(
         uiState = LogInUiState(isLoading = true),
         onClick = { username, password -> },
-        onLogin = {},
         onErrorShown = {})
 }
