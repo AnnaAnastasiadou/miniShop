@@ -28,6 +28,8 @@ class HomeViewModel @Inject constructor(
     private var allProducts: List<Product>? = null
     private var currentCategoryProducts: List<Product>? = null
 
+    private var currentQuery: String = ""
+
     init {
         loadData()
     }
@@ -126,40 +128,64 @@ class HomeViewModel @Inject constructor(
 
     }
 
+    private fun applyFiltersAndUpdateUi() {
+        val products = currentCategoryProducts ?: emptyList()
+
+        val filtered = if (currentQuery.isBlank()) {
+            products
+        } else {
+            products.filter {
+                it.title.lowercase().contains(currentQuery.lowercase())
+            }
+        }
+        _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = filtered)) }
+    }
+
     fun onEvent(event: HomeScreenUiEvent) {
         when (event) {
             is HomeScreenUiEvent.OnCategorySelected -> {
                 val categoryLower = event.category.lowercase()
-                if (categoryLower == "all") {
-                    _uiState.update {
-                        it.copy(
-                            productsUiState = it.productsUiState.copy(data = allProducts),
-                            categoriesUiState = it.categoriesUiState.copy(selectedCategory = "all")
-                        )
-                    }
-                    return
-                }
-                val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
+
                 _uiState.update {
                     it.copy(
-                        productsUiState = it.productsUiState.copy(data = filteredProducts),
                         categoriesUiState = it.categoriesUiState.copy(selectedCategory = categoryLower)
                     )
                 }
-                currentCategoryProducts = filteredProducts
+
+                currentCategoryProducts = if (categoryLower == "all") {
+                     allProducts
+                } else {
+                    groupedProducts[categoryLower]
+                }
+                applyFiltersAndUpdateUi()
+
+//                if (categoryLower == "all") {
+//                    _uiState.update {
+//                        it.copy(
+//                            productsUiState = it.productsUiState.copy(data = allProducts),
+//                            categoriesUiState = it.categoriesUiState.copy(selectedCategory = "all")
+//                        )
+//                    }
+//                    return
+//                }
+//                val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
+//                _uiState.update {
+//                    it.copy(
+//                        productsUiState = it.productsUiState.copy(data = filteredProducts),
+//                        categoriesUiState = it.categoriesUiState.copy(selectedCategory = categoryLower)
+//                    )
+//                }
+//                currentCategoryProducts = filteredProducts
             }
 
             is HomeScreenUiEvent.OnSearch -> {
-                uiState.value.productsUiState.data?.let { data ->
-                    val searchedProducts = currentCategoryProducts?.filter {
-                        it.title.lowercase().contains(event.query.lowercase())
-                    }
-                    _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = searchedProducts)) }
-                }
+                currentQuery = event.query
+                applyFiltersAndUpdateUi()
             }
 
             HomeScreenUiEvent.OnClear -> {
-                _uiState.update { it.copy(productsUiState = it.productsUiState.copy(data = allProducts)) }
+                currentQuery = ""
+                applyFiltersAndUpdateUi()
             }
         }
     }
