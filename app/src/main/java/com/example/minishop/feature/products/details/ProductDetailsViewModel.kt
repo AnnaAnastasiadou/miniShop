@@ -3,12 +3,14 @@ package com.example.minishop.feature.products.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.minishop.data.local.model.CartProductLocal
 import com.example.minishop.data.local.model.FavoriteProduct
 import com.example.minishop.data.mapper.toProduct
 import com.example.minishop.data.repository.cart.CartRepository
 import com.example.minishop.data.repository.favorites.FavoritesRepository
 import com.example.minishop.data.repository.products.ProductsRepository
+import com.example.minishop.feature.RootDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +25,8 @@ class ProductDetailsViewModel @Inject constructor(
     private val cartRepository: CartRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val productId: Int = savedStateHandle.get<Int>("productId") ?: -1
+    private val args: RootDestination.Details = savedStateHandle.toRoute()
+    private val productId: Int = args.productId
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState = _uiState.asStateFlow()
 
