@@ -90,14 +90,7 @@ fun ShopRootNavHost(
         modifier = modifier.statusBarsPadding()
     ) {
         composable<RootDestination.LogIn> {
-            LogInScreen(
-                onLogin = {
-                    rootNavController.navigate(RootDestination.Main) {
-                        popUpTo(RootDestination.LogIn) { inclusive = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                })
+            LogInScreen()
         }
         composable<RootDestination.Main> {
             MainScreen(onProductClick = { productId ->
@@ -162,7 +155,7 @@ fun MainScreen(
                 tabs.forEach { tab ->
                     NavigationBarItem(
                         // hasRoute(RouteClass) returns true if this NavDestination was created from the given @Serializable route type.
-                        selected = currentDestination?.hierarchy?.any { it.hasRoute(tab.destination::class)} == true,
+                        selected = currentDestination?.hierarchy?.any { it.hasRoute(tab.destination::class) } == true,
                         onClick = {
                             navController.navigate(route = tab.destination) {
                                 popUpTo(navController.graph.findStartDestination().id) {

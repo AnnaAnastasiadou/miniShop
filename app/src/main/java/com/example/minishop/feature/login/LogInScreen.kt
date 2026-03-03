@@ -1,5 +1,6 @@
 package com.example.minishop.feature.login
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,16 +38,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.minishop.R
+import kotlinx.coroutines.delay
+import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun LogInScreen(
-    viewModel: LogInViewModel = hiltViewModel(), onLogin: () -> Unit
+    viewModel: LogInViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val onClick: (String, String) -> Unit =
         { username, password -> viewModel.logIn(username, password) }
     val onErrorShown: () -> Unit = { viewModel.clearError() }
-    LogInContent(uiState, onClick, onLogin, onErrorShown)
+    LogInContent(
+        uiState,
+        onClick,
+        onErrorShown
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +61,6 @@ fun LogInScreen(
 fun LogInContent(
     uiState: LogInUiState,
     onClick: (String, String) -> Unit,
-    onLogin: () -> Unit,
     onErrorShown: () -> Unit
 ) {
     var usernameText by remember { mutableStateOf("") }
@@ -65,7 +71,11 @@ fun LogInContent(
         CenterAlignedTopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = stringResource(R.string.minishop), fontWeight = FontWeight.Bold, fontSize = 40.sp)
+                    Text(
+                        text = stringResource(R.string.minishop),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 40.sp
+                    )
                     Icon(
                         painter = painterResource(R.drawable.ic_shopping_cart),
                         contentDescription = null,
@@ -126,22 +136,15 @@ fun LogInContent(
             } else {
                 CircularProgressIndicator()
             }
-
-
         }
     }
 
     val loginErrorMessage: String = stringResource(R.string.login_error)
-    LaunchedEffect(uiState.error) {
-        if (!uiState.error.isNullOrBlank()) {
+
+    if (!uiState.error.isNullOrBlank()) {
+        LaunchedEffect(uiState.error) {
             snackBarHostState.showSnackbar(loginErrorMessage)
             onErrorShown()
-        }
-    }
-
-    LaunchedEffect(uiState.success) {
-        if (uiState.success) {
-            onLogin()
         }
     }
 }
@@ -152,6 +155,5 @@ fun PreviewLoginScreen() {
     LogInContent(
         uiState = LogInUiState(isLoading = true),
         onClick = { username, password -> },
-        onLogin = {},
         onErrorShown = {})
 }
