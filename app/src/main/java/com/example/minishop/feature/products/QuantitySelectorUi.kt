@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,7 @@ fun QuantitySelector(
             IconButton(
                 onClick = { onDecreaseItem(product.id, product.quantity) },
                 modifier = Modifier.fillMaxHeight()
-            ) { Icon(painterResource(R.drawable.ic_minus), contentDescription = "Reduce item") }
+            ) { Icon(painterResource(R.drawable.ic_minus), contentDescription = stringResource(R.string.reduce_item)) }
 
             VerticalDivider(Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outline)
 
@@ -70,7 +71,7 @@ fun QuantitySelector(
             IconButton(
                 onClick = { onIncreaseItem(product.id, product.quantity) },
                 modifier = Modifier.fillMaxHeight()
-            ) { Icon(painterResource(R.drawable.ic_plus), contentDescription = "Increase item") }
+            ) { Icon(painterResource(R.drawable.ic_plus), contentDescription = stringResource(R.string.increase_item)) }
         }
 
         IconButton(
@@ -86,7 +87,7 @@ fun QuantitySelector(
         ) {
             Icon(
                 painterResource(R.drawable.ic_remove),
-                "Remove",
+                stringResource(R.string.remove),
             )
         }
     }

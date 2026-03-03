@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,7 +73,7 @@ fun FavoriteProductsContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(painterResource(R.drawable.ic_heart), null)
-                    Text("Favorites")
+                    Text(stringResource(R.string.favorites))
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -103,7 +104,7 @@ fun FavoriteProductsList(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("No favorites yet", fontSize = 24.sp)
+            Text(stringResource(R.string.no_favorites), fontSize = 24.sp)
             HorizontalDivider(
                 Modifier
                     .width(80.dp)
@@ -115,7 +116,7 @@ fun FavoriteProductsList(
                 onClick = { onBackToProducts() }
             ) {
                 Text(
-                    text = "Browse products",
+                    text = stringResource(R.string.browse_products),
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 22.sp,
                     textDecoration = TextDecoration.Underline,

@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,7 +65,7 @@ fun LogInContent(
         CenterAlignedTopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "MiniShop", fontWeight = FontWeight.Bold, fontSize = 40.sp)
+                    Text(text = stringResource(R.string.minishop), fontWeight = FontWeight.Bold, fontSize = 40.sp)
                     Icon(
                         painter = painterResource(R.drawable.ic_shopping_cart),
                         contentDescription = null,
@@ -95,14 +96,14 @@ fun LogInContent(
 
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Username", fontSize = 20.sp)
+                Text(text = stringResource(R.string.username), fontSize = 20.sp)
                 OutlinedTextField(
                     value = usernameText,
                     onValueChange = { usernameText = it },
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Password", fontSize = 20.sp)
+                Text(text = stringResource(R.string.password), fontSize = 20.sp)
                 OutlinedTextField(
                     value = passwordText,
                     onValueChange = { passwordText = it },
@@ -116,7 +117,7 @@ fun LogInContent(
                     enabled = !(usernameText.isBlank() || passwordText.isBlank())
                 ) {
                     Text(
-                        text = "LOGIN",
+                        text = stringResource(R.string.login),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(4.dp)
@@ -130,9 +131,10 @@ fun LogInContent(
         }
     }
 
+    val loginErrorMessage: String = stringResource(R.string.login_error)
     LaunchedEffect(uiState.error) {
         if (!uiState.error.isNullOrBlank()) {
-            snackBarHostState.showSnackbar("Invalid username or password")
+            snackBarHostState.showSnackbar(loginErrorMessage)
             onErrorShown()
         }
     }

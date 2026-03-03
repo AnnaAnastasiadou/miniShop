@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,7 +107,7 @@ fun ProductDetailsContent(
                     IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -130,7 +131,7 @@ fun ProductDetailsContent(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "An Error Occurred",
+                        text = stringResource(R.string.error_occurred),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
@@ -194,7 +195,9 @@ fun ProductDetailsSuccess(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_heart),
-                    contentDescription = if (product.isFavorite) "Remove from favorites" else "Add to favorites",
+                    contentDescription = if (product.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(
+                        R.string.add_to_favorites
+                    ),
                     tint = if (product.isFavorite) Color.White else Color.Red
                 )
             }
@@ -213,7 +216,10 @@ fun ProductDetailsSuccess(
                 )
             }
             HorizontalDivider(modifier = Modifier.fillMaxWidth())
-            Text("Category: ${product.category.replaceFirstChar { it.uppercase() }}")
+            Text(
+                stringResource(
+                    R.string.category,
+                    product.category.replaceFirstChar { it.uppercase() }))
             HorizontalDivider(modifier = Modifier.fillMaxWidth())
             Text(text = product.description)
             if (product.inCart == 0) {
@@ -226,7 +232,7 @@ fun ProductDetailsSuccess(
                     modifier = Modifier.fillMaxWidth(), shape = RectangleShape
                 ) {
                     Text(
-                        text = "Add to Cart",
+                        text = stringResource(R.string.add_to_cart),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         modifier = Modifier.padding(8.dp)

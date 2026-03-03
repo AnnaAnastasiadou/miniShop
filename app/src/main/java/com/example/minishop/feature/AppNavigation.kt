@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -61,17 +62,17 @@ sealed interface TabsDestination {
 }
 
 data class TabSpec(
-    val label: String,
+    val label: Int,
     val iconRes: Int,
     val destination: TabsDestination
 )
 
 
 val tabs = listOf(
-    TabSpec("Home", R.drawable.ic_home, TabsDestination.Home),
-    TabSpec("Favorites", R.drawable.ic_heart, TabsDestination.Favorites),
-    TabSpec("Cart", R.drawable.ic_shopping_cart, TabsDestination.Cart),
-    TabSpec("Profile", R.drawable.ic_avatar, TabsDestination.Profile)
+    TabSpec(R.string.home, R.drawable.ic_home, TabsDestination.Home),
+    TabSpec(R.string.favorites, R.drawable.ic_heart, TabsDestination.Favorites),
+    TabSpec(R.string.cart, R.drawable.ic_shopping_cart, TabsDestination.Cart),
+    TabSpec(R.string.profile, R.drawable.ic_avatar, TabsDestination.Profile)
 )
 
 @Composable
@@ -174,7 +175,7 @@ fun MainScreen(
                         icon = {
                             Icon(
                                 painter = painterResource(tab.iconRes),
-                                contentDescription = null
+                                contentDescription = stringResource(tab.label)
                             )
                         })
                 }

@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -86,11 +87,11 @@ fun HomeScreenContent(
                             onSearch(searchQuery)
                         },
                         singleLine = true,
-                        placeholder = { Text("Search products...") },
+                        placeholder = { Text(stringResource(R.string.search_products)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    Text("MiniShop", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                    Text(stringResource(R.string.minishop), fontWeight = FontWeight.Bold, fontSize = 24.sp)
                 }
             },
             actions = {
@@ -104,7 +105,7 @@ fun HomeScreenContent(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_close),
-                            contentDescription = "Close search",
+                            contentDescription = stringResource(R.string.close_search),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -116,7 +117,7 @@ fun HomeScreenContent(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_search),
-                            contentDescription = "Search",
+                            contentDescription = stringResource(R.string.search),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
