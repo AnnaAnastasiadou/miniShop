@@ -59,74 +59,62 @@ class HomeViewModel @Inject constructor(
             val categoriesRes = categoriesAsync.await()
             val productRes = productAsync.await()
 
-            handleCategories(categoriesRes)
-            handleProducts(productRes)
+            val categoriesUiState = handleCategories(categoriesRes)
+            val productsUiState = handleProducts(productRes)
+
+            _uiState.update { it.copy(categoriesUiState = categoriesUiState, productsUiState = productsUiState) }
         }
     }
 
-    private fun handleCategories(categoryRes: NetworkResult<List<String>>) {
+    private fun handleCategories(categoryRes: NetworkResult<List<String>>): CategoriesUiState {
 
         when (categoryRes) {
             is NetworkResult.Success -> {
                 val categories = listOf("all") + categoryRes.data
-                _uiState.update {
-                    it.copy(
-                        categoriesUiState = it.categoriesUiState.copy(
-                            isLoading = false,
-                            data = categories,
-                            error = null
-                        )
-                    )
-                }
+                return CategoriesUiState(
+                    isLoading = false,
+                    data = categories,
+                    error = null
+                )
             }
 
             is NetworkResult.Error -> {
-                _uiState.update {
-                    it.copy(
-                        categoriesUiState = it.categoriesUiState.copy(
-                            isLoading = false,
-                            data = null,
-                            error = categoryRes.message
-                        )
-                    )
-                }
+                return CategoriesUiState(
+                    isLoading = false,
+                    data = null,
+                    error = categoryRes.message
+                )
             }
         }
     }
 
-    private fun handleProducts(productsRes: NetworkResult<List<ProductDto>>) {
+
+    private fun handleProducts(productsRes: NetworkResult<List<ProductDto>>): ProductsUiState {
 
         when (productsRes) {
             is NetworkResult.Success -> {
                 val products = productsRes.data.map { it.toProduct() }
                 groupedProducts = products.groupBy { it.category.lowercase() }
-                _uiState.update {
-                    it.copy(
-                        productsUiState = it.productsUiState.copy(
-                            isLoading = false,
-                            data = products,
-                            error = null
-                        )
-                    )
-                }
+
                 allProducts = products
                 currentCategoryProducts = products
+                return ProductsUiState(
+                    isLoading = false,
+                    data = products,
+                    error = null
+                )
             }
 
             is NetworkResult.Error -> {
-                _uiState.update {
-                    it.copy(
-                        productsUiState = it.productsUiState.copy(
-                            isLoading = false,
-                            data = null,
-                            error = productsRes.message
-                        )
-                    )
-                }
+                return ProductsUiState(
+                    isLoading = false,
+                    data = null,
+                    error = productsRes.message
+                )
             }
         }
-
     }
+
 
     private fun applyFiltersAndUpdateUi() {
         val products = currentCategoryProducts ?: emptyList()
@@ -153,29 +141,12 @@ class HomeViewModel @Inject constructor(
                 }
 
                 currentCategoryProducts = if (categoryLower == "all") {
-                     allProducts
+                    allProducts
                 } else {
                     groupedProducts[categoryLower]
                 }
                 applyFiltersAndUpdateUi()
 
-//                if (categoryLower == "all") {
-//                    _uiState.update {
-//                        it.copy(
-//                            productsUiState = it.productsUiState.copy(data = allProducts),
-//                            categoriesUiState = it.categoriesUiState.copy(selectedCategory = "all")
-//                        )
-//                    }
-//                    return
-//                }
-//                val filteredProducts = groupedProducts[categoryLower] ?: emptyList()
-//                _uiState.update {
-//                    it.copy(
-//                        productsUiState = it.productsUiState.copy(data = filteredProducts),
-//                        categoriesUiState = it.categoriesUiState.copy(selectedCategory = categoryLower)
-//                    )
-//                }
-//                currentCategoryProducts = filteredProducts
             }
 
             is HomeScreenUiEvent.OnSearch -> {
