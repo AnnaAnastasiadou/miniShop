@@ -213,9 +213,40 @@ class ProductDetailsViewModelTest {
     }
 
     @Test
-    fun `onIncreaseQuantity logic verification`() {
+    fun `onIncreaseQuantity logic verification`() = runTest{
         // Verify cartRepository.increaseQuantity is called and uiState.data.inCart is updated to current quantity + 1.
-        // TODO implement test
+        coEvery { productsRepository.getProductById(1) } returns productDetailsDto
+        coEvery { cartRepository.getQuantityById(1) } returns 0
+        coEvery { favoritesRepository.isFavorite(1) } returns false
+        coEvery { cartRepository.increaseQuantity(1, 1) } returns Unit
+        coEvery { cartRepository.increaseQuantity(1, 2) } returns Unit
+
+
+        viewModel = createViewModel()
+        viewModel.uiState.test {
+            assertEquals(
+                ProductDetailsUiState(isLoading = false, data = null, error = null),
+                awaitItem()
+            )
+            assertEquals(
+                ProductDetailsUiState(isLoading = true, data = null, error = null),
+                awaitItem()
+            )
+            assertEquals(
+                ProductDetailsUiState(isLoading = false, data = productDetails, error = null),
+                awaitItem()
+            )
+            viewModel.onEvent(DetailsScreenUiEvent.OnIncreaseQuantity(1, 1))
+            assertEquals(
+                ProductDetailsUiState(isLoading = false, data = productDetails.copy(inCart = 2), error = null),
+                awaitItem()
+            )
+            viewModel.onEvent(DetailsScreenUiEvent.OnIncreaseQuantity(1, 2))
+            assertEquals(
+                ProductDetailsUiState(isLoading = false, data = productDetails.copy(inCart = 3), error = null),
+                awaitItem()
+            )
+        }
     }
 
     @Test
