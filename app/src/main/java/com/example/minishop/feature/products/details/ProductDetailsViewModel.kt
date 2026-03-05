@@ -24,9 +24,11 @@ class ProductDetailsViewModel @Inject constructor(
     private val productsRepository: ProductsRepository,
     private val cartRepository: CartRepository,
     savedStateHandle: SavedStateHandle
+
 ) : ViewModel() {
-    private val args: RootDestination.Details = savedStateHandle.toRoute()
-    private val productId: Int = args.productId
+    private val productId = checkNotNull(savedStateHandle.get<Int>("productId")) {
+        "productIs is missing from SavedStateHandle"
+    }
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState = _uiState.asStateFlow()
 

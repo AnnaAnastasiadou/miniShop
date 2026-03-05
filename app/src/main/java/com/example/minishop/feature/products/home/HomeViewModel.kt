@@ -117,12 +117,12 @@ class HomeViewModel @Inject constructor(
 
 
     private fun applyFiltersAndUpdateUi() {
-        val products = currentCategoryProducts ?: emptyList()
+        val products = currentCategoryProducts
 
         val filtered = if (currentQuery.isBlank()) {
             products
         } else {
-            products.filter {
+            products?.filter {
                 it.title.lowercase().contains(currentQuery.lowercase())
             }
         }
@@ -143,7 +143,7 @@ class HomeViewModel @Inject constructor(
                 currentCategoryProducts = if (categoryLower == "all") {
                     allProducts
                 } else {
-                    groupedProducts[categoryLower]
+                    groupedProducts[categoryLower] ?: emptyList()
                 }
                 applyFiltersAndUpdateUi()
 

@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.minishop.R
 import com.example.minishop.feature.Product
+import com.example.minishop.feature.RootDestination
 import com.example.minishop.feature.products.QuantitySelector
 import com.example.minishop.feature.toCartProduct
 import kotlin.text.replaceFirstChar

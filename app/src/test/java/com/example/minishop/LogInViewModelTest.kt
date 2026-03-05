@@ -127,11 +127,13 @@ class LogInViewModelTest {
             awaitItem()
 
             viewModel.logIn("user", "fail")
+            advanceUntilIdle()
 
             awaitItem()
             assertEquals(LogInUiState(isLoading = false, error = "Logging in error"), awaitItem())
 
             viewModel.logIn("user", "pass")
+            advanceUntilIdle()
 
             awaitItem()
             assertEquals(LogInUiState(isLoading = false, error = null), awaitItem())
@@ -148,16 +150,19 @@ class LogInViewModelTest {
             awaitItem()
 
             viewModel.logIn("user", "fail")
+            advanceUntilIdle()
 
             awaitItem()
             assertEquals(LogInUiState(isLoading = false, error = "Logging in error"), awaitItem())
 
             viewModel.logIn("user", "fail")
+            advanceUntilIdle()
 
             awaitItem()
             assertEquals(LogInUiState(isLoading = false, error = "Logging in error"), awaitItem())
 
             viewModel.logIn("user", "fail")
+            advanceUntilIdle()
 
             awaitItem()
             assertEquals(LogInUiState(isLoading = false, error = "Logging in error"), awaitItem())

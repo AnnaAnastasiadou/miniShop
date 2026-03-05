@@ -99,6 +99,7 @@ fun ShopRootNavHost(
         }
         composable<RootDestination.Details> { backStackEntry ->
             val args = backStackEntry.toRoute<RootDestination.Details>()
+            backStackEntry.savedStateHandle["productId"] = args.productId
             ProductDetailsScreen(onBack = { rootNavController.popBackStack() })
         }
     }
